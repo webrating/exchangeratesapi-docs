@@ -23,7 +23,12 @@ jobs:
         run: npm install -g mintlify
         
       - name: Validate Mintlify configuration
-        run: mintlify dev --port 3000 &
+        run: |
+          if [ ! -f "docs.json" ]; then
+            echo "Error: docs.json not found. Mintlify requires docs.json configuration file."
+            exit 1
+          fi
+          mintlify dev --port 3000 &
         
       - name: Wait for dev server
         run: sleep 10

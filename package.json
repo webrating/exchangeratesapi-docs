@@ -7,17 +7,9 @@
     "start": "mintlify dev",
     "build": "mintlify build",
     "preview": "mintlify dev",
-    "validate": "mintlify dev --port 3000"
+    "validate": "mintlify dev --port 3000",
+    "install": "npm install -g mintlify"
   },
-  "keywords": [
-    "exchange-rates",
-    "currency-api",
-    "rba",
-    "australia",
-    "documentation",
-    "api",
-    "mintlify"
-  ],
   "author": "Exchange Rates API",
   "license": "MIT",
   "devDependencies": {
@@ -25,11 +17,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/exchangeratesapi-docs.git"
+    "url": "https://github.com/webrating/exchangeratesapi-docs.git"
   },
   "homepage": "https://docs.exchangeratesapi.com.au",
   "bugs": {
-    "url": "https://github.com/your-username/exchangeratesapi-docs/issues"
+    "url": "https://github.com/webrating/exchangeratesapi-docs/issues"
   },
   "engines": {
     "node": ">=16.0.0"

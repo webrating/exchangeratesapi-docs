@@ -1,18 +1,19 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "Exchange Rates API",
+  "theme": "willow",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {
-    "primary": "#16a34a",
-    "light": "#22c55e",
-    "dark": "#14532d",
+    "primary": "#4742A9",
+    "light": "#5B56BD",
+    "dark": "#252258",
     "anchors": {
-      "from": "#16a34a",
-      "to": "#22c55e"
+      "from": "#4742A9",
+      "to": "#5B56BD"
     }
   },
   "topbarLinks": [
@@ -86,36 +87,19 @@
     {
       "group": "Authenticated Endpoints",
       "pages": [
-        "api-reference/authenticated/latest",
-        "api-reference/authenticated/latest-single",
-        "api-reference/authenticated/historical",
-        "api-reference/authenticated/historical-single",
-        "api-reference/authenticated/timeseries",
-        "api-reference/authenticated/convert"
-      ]
-    },
-    {
-      "group": "Error Handling",
-      "pages": [
-        "api-reference/errors"
+        "api-reference/authenticated/latest"
       ]
     },
     {
       "group": "SDKs & Examples",
       "pages": [
-        "sdks/javascript",
-        "sdks/python",
-        "sdks/php",
-        "sdks/curl"
+        "sdks/javascript"
       ]
     },
     {
       "group": "Guides",
       "pages": [
-        "guides/dashboard",
-        "guides/best-practices",
-        "guides/migration",
-        "guides/compliance"
+        "guides/best-practices"
       ]
     },
     {
@@ -123,13 +107,6 @@
       "pages": [
         "changelog",
         "support"
-      ]
-    },
-    {
-      "group": "Legal",
-      "pages": [
-        "legal/terms",
-        "legal/privacy"
       ]
     }
   ],
@@ -146,7 +123,6 @@
       "mode": "show"
     }
   },
-  "openapi": "https://api.exchangeratesapi.com.au/openapi.json",
   "analytics": {
     "ga4": {
       "measurementId": "G-XXXXXXXXXX"
