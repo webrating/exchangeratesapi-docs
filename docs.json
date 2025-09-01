@@ -10,11 +10,7 @@
   "colors": {
     "primary": "#4742A9",
     "light": "#5B56BD",
-    "dark": "#252258",
-    "anchors": {
-      "from": "#4742A9",
-      "to": "#5B56BD"
-    }
+    "dark": "#252258"
   },
   "topbarLinks": [
     {
@@ -51,7 +47,7 @@
       "url": "https://exchangeratesapi.com.au"
     },
     {
-      "name": "Dashboard",
+      "name": "Dashboard", 
       "icon": "chart-line",
       "url": "https://app.exchangeratesapi.com.au/dashboard"
     },
@@ -71,7 +67,7 @@
       "group": "Get Started",
       "pages": [
         "introduction",
-        "quickstart",
+        "quickstart", 
         "authentication",
         "rate-limits"
       ]
@@ -85,7 +81,7 @@
       ]
     },
     {
-      "group": "Authenticated Endpoints",
+      "group": "Authenticated Endpoints", 
       "pages": [
         "api-reference/authenticated/latest"
       ]
@@ -112,15 +108,12 @@
   ],
   "footerSocials": {
     "website": "https://exchangeratesapi.com.au",
-    "github": "https://github.com/exchangeratesapi"
+    "github": "https://github.com/webrating/exchangeratesapi-docs"
   },
   "api": {
     "baseUrl": "https://api.exchangeratesapi.com.au",
     "auth": {
       "method": "bearer"
-    },
-    "playground": {
-      "mode": "show"
     }
   },
   "analytics": {
