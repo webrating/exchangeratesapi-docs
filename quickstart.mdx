@@ -1,0 +1,357 @@
+---
+title: 'Quickstart'
+description: 'Get up and running with the Exchange Rates API in under 2 minutes'
+---
+
+## Get Your API Key
+
+<Steps>
+  <Step title="Sign Up">
+    Visit [app.exchangeratesapi.com.au](https://app.exchangeratesapi.com.au) and sign up using your email address.
+    
+    <Note>No credit card required for the free tier (50 requests/day)</Note>
+  </Step>
+  
+  <Step title="Verify Your Email">
+    Check your email inbox and click the magic link to verify your account. This will automatically log you into the dashboard.
+  </Step>
+  
+  <Step title="Generate API Key">
+    In the dashboard, click **"Generate New API Key"**. Your API key will have a unique Australian suburb prefix (e.g., `buderim_abc123...`).
+    
+    <Warning>Copy your API key immediately - it's only shown once for security reasons</Warning>
+  </Step>
+  
+  <Step title="Make Your First Request">
+    Test your API key with a simple request to get the latest exchange rates:
+    
+    ```bash
+    curl https://api.exchangeratesapi.com.au/latest \
+      -H "Authorization: Bearer buderim_your_api_key_here"
+    ```
+  </Step>
+</Steps>
+
+## Your First API Call
+
+Let's start with the most common use case - getting current exchange rates:
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.exchangeratesapi.com.au/latest \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
+  headers: {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+  }
+});
+
+const data = await response.json();
+
+if (data.success) {
+  console.log(`Current USD rate: ${data.rates.USD}`);
+  console.log(`Data from: ${data.date}`);
+} else {
+  console.error('API Error:', data.error);
+}
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+}
+
+response = requests.get(
+    'https://api.exchangeratesapi.com.au/latest',
+    headers=headers
+)
+
+data = response.json()
+
+if data['success']:
+    print(f"Current USD rate: {data['rates']['USD']}")
+    print(f"Data from: {data['date']}")
+else:
+    print(f"API Error: {data['error']['info']}")
+```
+
+```php PHP
+<?php
+$api_key = 'buderim_your_api_key_here';
+
+$curl = curl_init();
+curl_setopt_array($curl, [
+    CURLOPT_URL => 'https://api.exchangeratesapi.com.au/latest',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $api_key
+    ],
+]);
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+$data = json_decode($response, true);
+
+if ($data['success']) {
+    echo "Current USD rate: " . $data['rates']['USD'] . "\n";
+    echo "Data from: " . $data['date'] . "\n";
+} else {
+    echo "API Error: " . $data['error']['info'] . "\n";
+}
+?>
+```
+
+</CodeGroup>
+
+### Expected Response
+
+```json
+{
+  "success": true,
+  "timestamp": 1725080400,
+  "base": "AUD",
+  "date": "2025-08-31",
+  "rates": {
+    "USD": 0.643512,
+    "EUR": 0.562934,
+    "GBP": 0.487421,
+    "JPY": 96.832100,
+    "NZD": 1.094200,
+    "CAD": 0.893421,
+    "CHF": 0.578234,
+    "CNY": 4.623451,
+    "TWI": 60.500000
+  }
+}
+```
+
+## Currency Conversion
+
+Convert amounts between currencies:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100" \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```javascript JavaScript
+const amount = 100;
+const from = 'AUD';
+const to = 'USD';
+
+const response = await fetch(
+  `https://api.exchangeratesapi.com.au/convert?from=${from}&to=${to}&amount=${amount}`,
+  {
+    headers: {
+      'Authorization': 'Bearer buderim_your_api_key_here'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(`${amount} ${from} = ${data.result} ${to}`);
+```
+
+```python Python
+import requests
+
+params = {
+    'from': 'AUD',
+    'to': 'USD',
+    'amount': 100
+}
+
+headers = {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+}
+
+response = requests.get(
+    'https://api.exchangeratesapi.com.au/convert',
+    params=params,
+    headers=headers
+)
+
+data = response.json()
+print(f"{params['amount']} {params['from']} = {data['result']} {params['to']}")
+```
+
+```php PHP
+<?php
+$params = http_build_query([
+    'from' => 'AUD',
+    'to' => 'USD',
+    'amount' => 100
+]);
+
+$curl = curl_init();
+curl_setopt_array($curl, [
+    CURLOPT_URL => 'https://api.exchangeratesapi.com.au/convert?' . $params,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer buderim_your_api_key_here'
+    ],
+]);
+
+$response = curl_exec($curl);
+$data = json_decode($response, true);
+
+echo "100 AUD = " . $data['result'] . " USD";
+?>
+```
+
+</CodeGroup>
+
+### Conversion Response
+
+```json
+{
+  "success": true,
+  "query": {
+    "from": "AUD",
+    "to": "USD",
+    "amount": 100
+  },
+  "info": {
+    "timestamp": 1725080400,
+    "rate": 0.643512
+  },
+  "date": "2025-08-31",
+  "result": 64.3512
+}
+```
+
+## Historical Data
+
+Get exchange rates from any date since 2018:
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.exchangeratesapi.com.au/2024-12-01 \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```javascript JavaScript
+const historicalDate = '2024-12-01';
+
+const response = await fetch(
+  `https://api.exchangeratesapi.com.au/${historicalDate}`,
+  {
+    headers: {
+      'Authorization': 'Bearer buderim_your_api_key_here'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(`USD rate on ${historicalDate}: ${data.rates.USD}`);
+```
+
+```python Python
+import requests
+
+historical_date = '2024-12-01'
+headers = {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+}
+
+response = requests.get(
+    f'https://api.exchangeratesapi.com.au/{historical_date}',
+    headers=headers
+)
+
+data = response.json()
+print(f"USD rate on {historical_date}: {data['rates']['USD']}")
+```
+
+</CodeGroup>
+
+## Error Handling
+
+Always check the `success` field in responses:
+
+```javascript
+const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
+  headers: {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+  }
+});
+
+const data = await response.json();
+
+if (!data.success) {
+  switch (data.error.code) {
+    case 401:
+      console.error('Invalid API key');
+      break;
+    case 429:
+      console.error('Rate limit exceeded');
+      break;
+    case 400:
+      console.error('Bad request:', data.error.info);
+      break;
+    default:
+      console.error('API error:', data.error.info);
+  }
+} else {
+  // Process successful response
+  console.log('Current rates:', data.rates);
+}
+```
+
+## Free Tier Testing
+
+Want to try the API without signing up? Use our free conversion endpoint (3 requests/hour per IP):
+
+```bash
+curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100"
+# No authentication required for free tier
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api-reference"
+  >
+    Explore all available endpoints and parameters
+  </Card>
+  <Card
+    title="Authentication"
+    icon="key"
+    href="/authentication"
+  >
+    Learn about API key security and best practices
+  </Card>
+  <Card
+    title="Rate Limits"
+    icon="gauge"
+    href="/rate-limits"
+  >
+    Understand plan limits and upgrade options
+  </Card>
+  <Card
+    title="SDKs"
+    icon="code"
+    href="/sdks"
+  >
+    Use our official SDKs for popular languages
+  </Card>
+</CardGroup>
+
+## Need Help?
+
+- 📧 Email: [support@exchangeratesapi.com.au](mailto:support@exchangeratesapi.com.au)
+- 📊 Status Page: [status.exchangeratesapi.com.au](https://status.exchangeratesapi.com.au)
+- 📱 Dashboard: [app.exchangeratesapi.com.au](https://app.exchangeratesapi.com.au)

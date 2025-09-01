@@ -1,0 +1,971 @@
+---
+title: 'Best Practices'
+description: 'Learn how to optimize performance, handle errors gracefully, and implement robust currency conversion applications'
+---
+
+## API Key Security
+
+### Environment Variables
+Never hardcode API keys in your source code. Use environment variables instead:
+
+<CodeGroup>
+
+```javascript Node.js
+// ✅ Good - Environment variable
+const API_KEY = process.env.EXCHANGE_RATES_API_KEY;
+
+// ❌ Bad - Hardcoded (never do this!)
+const API_KEY = 'buderim_abc123...';
+```
+
+```python Python
+import os
+
+# ✅ Good - Environment variable  
+API_KEY = os.getenv('EXCHANGE_RATES_API_KEY')
+
+# ❌ Bad - Hardcoded (never do this!)
+API_KEY = 'buderim_abc123...'
+```
+
+```php PHP
+<?php
+// ✅ Good - Environment variable
+$apiKey = $_ENV['EXCHANGE_RATES_API_KEY'];
+
+// ❌ Bad - Hardcoded (never do this!)
+$apiKey = 'buderim_abc123...';
+?>
+```
+
+</CodeGroup>
+
+### Server-Side Only
+API keys should only be used in server-side applications:
+
+```javascript
+// ❌ Bad - Frontend JavaScript (exposed to users!)
+const API_KEY = process.env.REACT_APP_EXCHANGE_RATES_API_KEY;
+
+// ✅ Good - Create a backend proxy endpoint
+app.get('/api/exchange-rates', async (req, res) => {
+  const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
+    headers: { 'Authorization': `Bearer ${process.env.EXCHANGE_RATES_API_KEY}` }
+  });
+  const data = await response.json();
+  res.json(data);
+});
+```
+
+### Key Rotation
+Implement regular key rotation for enhanced security:
+
+```javascript
+class APIKeyManager {
+  constructor() {
+    this.currentKey = process.env.EXCHANGE_RATES_API_KEY;
+    this.fallbackKey = process.env.EXCHANGE_RATES_API_KEY_BACKUP;
+  }
+  
+  async makeRequest(endpoint) {
+    try {
+      return await this.requestWithKey(endpoint, this.currentKey);
+    } catch (error) {
+      if (error.code === 401 && this.fallbackKey) {
+        console.warn('Primary key failed, trying fallback key');
+        return await this.requestWithKey(endpoint, this.fallbackKey);
+      }
+      throw error;
+    }
+  }
+  
+  async requestWithKey(endpoint, key) {
+    const response = await fetch(`https://api.exchangeratesapi.com.au${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${key}` }
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      const error = new Error(data.error.info);
+      error.code = data.error.code;
+      throw error;
+    }
+    
+    return data;
+  }
+}
+```
+
+## Caching Strategies
+
+### Smart Caching Based on RBA Schedule
+RBA updates rates daily at 4 PM AEST. Cache aggressively until the next update:
+
+```javascript
+class SmartCache {
+  constructor() {
+    this.cache = new Map();
+    this.cacheExpiry = new Map();
+  }
+  
+  getNextRBAUpdate() {
+    const now = new Date();
+    const nextUpdate = new Date();
+    
+    // Set to 4:15 PM AEST (15 minutes after RBA update)
+    nextUpdate.setHours(16, 15, 0, 0);
+    
+    // If it's already past 4:15 PM today, use tomorrow
+    if (now > nextUpdate) {
+      nextUpdate.setDate(nextUpdate.getDate() + 1);
+    }
+    
+    // Skip weekends (RBA doesn't update on weekends)
+    while (nextUpdate.getDay() === 0 || nextUpdate.getDay() === 6) {
+      nextUpdate.setDate(nextUpdate.getDate() + 1);
+    }
+    
+    return nextUpdate;
+  }
+  
+  async getLatestRates(apiClient) {
+    const cacheKey = 'latest_rates';
+    const now = Date.now();
+    
+    // Check if cached data is still valid
+    if (this.cache.has(cacheKey) && this.cacheExpiry.get(cacheKey) > now) {
+      return this.cache.get(cacheKey);
+    }
+    
+    // Fetch fresh data
+    const data = await apiClient.getLatestRates();
+    
+    // Cache until next expected RBA update
+    const nextUpdate = this.getNextRBAUpdate();
+    
+    this.cache.set(cacheKey, data);
+    this.cacheExpiry.set(cacheKey, nextUpdate.getTime());
+    
+    console.log(`Cached rates until ${nextUpdate.toISOString()}`);
+    return data;
+  }
+}
+```
+
+### Historical Data Caching
+Historical rates never change, so cache them indefinitely:
+
+```python
+import requests
+import pickle
+import os
+from datetime import datetime, timedelta
+
+class HistoricalRateCache:
+    def __init__(self, api_key, cache_dir='./rate_cache'):
+        self.api_key = api_key
+        self.cache_dir = cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+    
+    def get_cache_file(self, date):
+        return os.path.join(self.cache_dir, f'rates_{date}.pkl')
+    
+    def get_historical_rates(self, date):
+        cache_file = self.get_cache_file(date)
+        
+        # Historical data never changes, so cache indefinitely
+        if os.path.exists(cache_file):
+            with open(cache_file, 'rb') as f:
+                return pickle.load(f)
+        
+        # Fetch from API
+        headers = {'Authorization': f'Bearer {self.api_key}'}
+        response = requests.get(f'https://api.exchangeratesapi.com.au/{date}', headers=headers)
+        data = response.json()
+        
+        if not data['success']:
+            raise Exception(f"API Error: {data['error']['info']}")
+        
+        # Cache the result
+        with open(cache_file, 'wb') as f:
+            pickle.dump(data, f)
+        
+        return data
+    
+    def get_date_range(self, start_date, end_date):
+        """Get rates for a date range using cached data where possible"""
+        current_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+        
+        results = {}
+        
+        while current_date <= end_date_obj:
+            date_str = current_date.strftime('%Y-%m-%d')
+            
+            # Skip weekends (RBA doesn't publish rates)
+            if current_date.weekday() < 5:  # Monday=0, Sunday=6
+                try:
+                    rates = self.get_historical_rates(date_str)
+                    results[date_str] = rates
+                except Exception as e:
+                    print(f"Failed to get rates for {date_str}: {e}")
+            
+            current_date += timedelta(days=1)
+        
+        return results
+```
+
+### Redis Caching for High-Traffic Applications
+
+```javascript
+const redis = require('redis');
+const client = redis.createClient();
+
+class RedisRateCache {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.client = client;
+  }
+  
+  async getLatestRates() {
+    const cacheKey = 'exchange_rates:latest';
+    
+    try {
+      // Try cache first
+      const cached = await this.client.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.warn('Redis cache error, fetching from API:', error);
+    }
+    
+    // Fetch from API
+    const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error.info);
+    }
+    
+    // Cache for 30 minutes
+    try {
+      await this.client.setex(cacheKey, 1800, JSON.stringify(data));
+    } catch (error) {
+      console.warn('Failed to cache rates:', error);
+    }
+    
+    return data;
+  }
+  
+  async getHistoricalRates(date) {
+    const cacheKey = `exchange_rates:historical:${date}`;
+    
+    try {
+      const cached = await this.client.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.warn('Redis cache error:', error);
+    }
+    
+    // Fetch from API
+    const response = await fetch(`https://api.exchangeratesapi.com.au/${date}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error.info);
+    }
+    
+    // Historical data never changes - cache indefinitely
+    try {
+      await this.client.set(cacheKey, JSON.stringify(data));
+    } catch (error) {
+      console.warn('Failed to cache historical rates:', error);
+    }
+    
+    return data;
+  }
+}
+```
+
+## Error Handling
+
+### Comprehensive Error Handling
+Implement robust error handling for all API scenarios:
+
+```javascript
+class RobustExchangeRatesAPI {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.baseURL = 'https://api.exchangeratesapi.com.au';
+    this.maxRetries = 3;
+    this.backoffMultiplier = 1.5;
+  }
+  
+  async makeRequest(endpoint, retryCount = 0) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${this.apiKey}` },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        const error = new Error(data.error.info);
+        error.code = data.error.code;
+        error.type = data.error.type;
+        throw error;
+      }
+      
+      return data;
+      
+    } catch (error) {
+      console.warn(`Request attempt ${retryCount + 1} failed:`, error.message);
+      
+      // Don't retry client errors (4xx) or authentication issues
+      if (error.code >= 400 && error.code < 500) {
+        throw error;
+      }
+      
+      // Retry network errors and server errors (5xx)
+      if (retryCount < this.maxRetries) {
+        const delay = Math.pow(this.backoffMultiplier, retryCount) * 1000;
+        console.log(`Retrying in ${delay}ms...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.makeRequest(endpoint, retryCount + 1);
+      }
+      
+      throw error;
+    }
+  }
+  
+  async getLatestRatesWithFallback() {
+    try {
+      return await this.makeRequest('/latest');
+    } catch (error) {
+      console.error('All retry attempts failed:', error.message);
+      
+      // Try to return cached/fallback data
+      const fallbackData = await this.getFallbackData();
+      if (fallbackData) {
+        console.warn('Using fallback data due to API failure');
+        return { ...fallbackData, fallback: true };
+      }
+      
+      throw new Error('Unable to fetch exchange rates and no fallback data available');
+    }
+  }
+  
+  async getFallbackData() {
+    // Implement fallback logic (cache, database, static file, etc.)
+    try {
+      const cached = localStorage.getItem('last_known_rates');
+      if (cached) {
+        const data = JSON.parse(cached);
+        // Only use if less than 24 hours old
+        if (Date.now() - data.timestamp < 86400000) {
+          return data;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load fallback data:', error);
+    }
+    return null;
+  }
+}
+```
+
+### Graceful Degradation
+Handle API failures gracefully in user interfaces:
+
+```javascript
+class CurrencyDisplayComponent {
+  constructor(apiKey) {
+    this.api = new RobustExchangeRatesAPI(apiKey);
+    this.state = {
+      rates: null,
+      loading: false,
+      error: null,
+      fallbackMode: false
+    };
+  }
+  
+  async loadRates() {
+    this.setState({ loading: true, error: null });
+    
+    try {
+      const data = await this.api.getLatestRatesWithFallback();
+      
+      this.setState({
+        rates: data,
+        loading: false,
+        fallbackMode: data.fallback || false
+      });
+      
+      // Cache successful responses
+      if (!data.fallback) {
+        localStorage.setItem('last_known_rates', JSON.stringify({
+          ...data,
+          timestamp: Date.now()
+        }));
+      }
+      
+    } catch (error) {
+      this.setState({
+        loading: false,
+        error: error.message,
+        // Keep existing rates if available
+        rates: this.state.rates
+      });
+    }
+  }
+  
+  render() {
+    const { rates, loading, error, fallbackMode } = this.state;
+    
+    if (loading) {
+      return '<div>Loading exchange rates...</div>';
+    }
+    
+    if (error && !rates) {
+      return `
+        <div class="error">
+          <p>Unable to load exchange rates: ${error}</p>
+          <button onclick="this.loadRates()">Retry</button>
+        </div>
+      `;
+    }
+    
+    if (!rates) {
+      return '<div>No exchange rate data available</div>';
+    }
+    
+    const warningBanner = fallbackMode ? `
+      <div class="warning">
+        ⚠️ Showing cached data due to API issues. Rates may not be current.
+      </div>
+    ` : '';
+    
+    const staleWarning = rates.stale ? `
+      <div class="warning">
+        ⚠️ Rate data is stale. RBA may not have updated as expected.
+      </div>
+    ` : '';
+    
+    return `
+      ${warningBanner}
+      ${staleWarning}
+      <div class="rates-container">
+        <h3>Exchange Rates (${rates.date})</h3>
+        <div class="rates-grid">
+          ${Object.entries(rates.rates).map(([currency, rate]) => `
+            <div class="rate-item">
+              <span class="currency">${currency}</span>
+              <span class="rate">${rate.toFixed(4)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <button onclick="this.loadRates()">Refresh</button>
+      </div>
+    `;
+  }
+  
+  setState(newState) {
+    this.state = { ...this.state, ...newState };
+    this.updateDOM();
+  }
+  
+  updateDOM() {
+    const container = document.getElementById('currency-display');
+    if (container) {
+      container.innerHTML = this.render();
+    }
+  }
+}
+```
+
+## Rate Limiting Management
+
+### Quota Monitoring
+Track and manage your API quota usage:
+
+```javascript
+class QuotaManager {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.quotaInfo = {
+      limit: null,
+      remaining: null,
+      reset: null
+    };
+  }
+  
+  async makeRequest(endpoint) {
+    // Check quota before making request
+    if (this.quotaInfo.remaining !== null && this.quotaInfo.remaining <= 0) {
+      const resetTime = new Date(this.quotaInfo.reset);
+      if (new Date() < resetTime) {
+        throw new Error(`Daily quota exceeded. Resets at ${resetTime.toLocaleString()}`);
+      }
+    }
+    
+    const response = await fetch(`https://api.exchangeratesapi.com.au${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    // Update quota info from response headers
+    this.updateQuotaInfo(response.headers);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error.info);
+    }
+    
+    return data;
+  }
+  
+  updateQuotaInfo(headers) {
+    const limit = headers.get('X-RateLimit-Limit-Daily');
+    const remaining = headers.get('X-RateLimit-Remaining-Daily');
+    const reset = headers.get('X-RateLimit-Reset');
+    
+    if (limit) this.quotaInfo.limit = parseInt(limit);
+    if (remaining) this.quotaInfo.remaining = parseInt(remaining);
+    if (reset) this.quotaInfo.reset = reset;
+  }
+  
+  getQuotaStatus() {
+    return {
+      ...this.quotaInfo,
+      usagePercentage: this.quotaInfo.limit && this.quotaInfo.remaining 
+        ? ((this.quotaInfo.limit - this.quotaInfo.remaining) / this.quotaInfo.limit * 100).toFixed(1)
+        : null
+    };
+  }
+  
+  shouldWarnUser() {
+    return this.quotaInfo.remaining !== null && this.quotaInfo.remaining < 10;
+  }
+}
+
+// Usage
+const quotaManager = new QuotaManager('buderim_your_api_key_here');
+
+try {
+  const rates = await quotaManager.makeRequest('/latest');
+  console.log('Current rates:', rates);
+  
+  const quotaStatus = quotaManager.getQuotaStatus();
+  console.log(`Quota: ${quotaStatus.remaining}/${quotaStatus.limit} (${quotaStatus.usagePercentage}% used)`);
+  
+  if (quotaManager.shouldWarnUser()) {
+    console.warn('Warning: Low quota remaining. Consider upgrading your plan.');
+  }
+} catch (error) {
+  console.error('Request failed:', error.message);
+}
+```
+
+### Request Batching
+Minimize API calls by batching multiple operations:
+
+```javascript
+class BatchProcessor {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.batchQueue = [];
+    this.batchTimeout = null;
+    this.batchDelay = 100; // ms
+  }
+  
+  async getRate(currency, date = null) {
+    return new Promise((resolve, reject) => {
+      this.batchQueue.push({
+        type: 'rate',
+        currency,
+        date,
+        resolve,
+        reject
+      });
+      
+      this.scheduleBatch();
+    });
+  }
+  
+  scheduleBatch() {
+    if (this.batchTimeout) return;
+    
+    this.batchTimeout = setTimeout(() => {
+      this.processBatch();
+      this.batchTimeout = null;
+    }, this.batchDelay);
+  }
+  
+  async processBatch() {
+    const batch = [...this.batchQueue];
+    this.batchQueue = [];
+    
+    // Group requests by type and date
+    const groups = this.groupRequests(batch);
+    
+    for (const group of groups) {
+      try {
+        await this.processGroup(group);
+      } catch (error) {
+        group.requests.forEach(req => req.reject(error));
+      }
+    }
+  }
+  
+  groupRequests(batch) {
+    const groups = new Map();
+    
+    for (const request of batch) {
+      const key = `${request.type}:${request.date || 'latest'}`;
+      
+      if (!groups.has(key)) {
+        groups.set(key, {
+          type: request.type,
+          date: request.date,
+          requests: []
+        });
+      }
+      
+      groups.get(key).requests.push(request);
+    }
+    
+    return Array.from(groups.values());
+  }
+  
+  async processGroup(group) {
+    let endpoint = group.date ? `/${group.date}` : '/latest';
+    
+    const response = await fetch(`https://api.exchangeratesapi.com.au${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error.info);
+    }
+    
+    // Resolve all requests in the group
+    group.requests.forEach(request => {
+      const rate = data.rates[request.currency];
+      request.resolve({
+        currency: request.currency,
+        rate,
+        date: data.date,
+        base: data.base
+      });
+    });
+  }
+}
+
+// Usage
+const batcher = new BatchProcessor('buderim_your_api_key_here');
+
+// These will be batched into a single API call
+const promises = [
+  batcher.getRate('USD'),
+  batcher.getRate('EUR'), 
+  batcher.getRate('GBP'),
+  batcher.getRate('JPY')
+];
+
+const results = await Promise.all(promises);
+console.log('All rates:', results);
+```
+
+## Performance Optimization
+
+### Connection Pooling
+For high-volume applications, use connection pooling:
+
+```javascript
+const https = require('https');
+
+class PerformantAPIClient {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    
+    // Create HTTPS agent with connection pooling
+    this.agent = new https.Agent({
+      keepAlive: true,
+      maxSockets: 10,
+      maxFreeSockets: 5,
+      timeout: 10000
+    });
+  }
+  
+  async makeRequest(endpoint) {
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'api.exchangeratesapi.com.au',
+        port: 443,
+        path: endpoint,
+        method: 'GET',
+        agent: this.agent,
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'User-Agent': 'MyApp/1.0'
+        }
+      };
+      
+      const req = https.request(options, (res) => {
+        let data = '';
+        
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            resolve(parsed);
+          } catch (error) {
+            reject(new Error('Invalid JSON response'));
+          }
+        });
+      });
+      
+      req.on('error', reject);
+      req.setTimeout(10000, () => {
+        req.destroy();
+        reject(new Error('Request timeout'));
+      });
+      
+      req.end();
+    });
+  }
+  
+  destroy() {
+    this.agent.destroy();
+  }
+}
+```
+
+### Compression
+Enable gzip compression for large responses:
+
+```javascript
+const response = await fetch('https://api.exchangeratesapi.com.au/timeseries?start_date=2024-01-01&end_date=2024-12-31', {
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Accept-Encoding': 'gzip, deflate'
+  }
+});
+```
+
+## Monitoring and Logging
+
+### Request Monitoring
+Track API performance and reliability:
+
+```javascript
+class APIMonitor {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.metrics = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      averageResponseTime: 0,
+      responseTimes: []
+    };
+  }
+  
+  async monitoredRequest(endpoint) {
+    const startTime = Date.now();
+    this.metrics.totalRequests++;
+    
+    try {
+      const response = await fetch(`https://api.exchangeratesapi.com.au${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${this.apiKey}` }
+      });
+      
+      const responseTime = Date.now() - startTime;
+      this.recordResponseTime(responseTime);
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        this.metrics.successfulRequests++;
+        this.logSuccess(endpoint, responseTime);
+      } else {
+        this.metrics.failedRequests++;
+        this.logError(endpoint, data.error, responseTime);
+      }
+      
+      return data;
+      
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+      this.metrics.failedRequests++;
+      this.recordResponseTime(responseTime);
+      this.logError(endpoint, error, responseTime);
+      throw error;
+    }
+  }
+  
+  recordResponseTime(time) {
+    this.metrics.responseTimes.push(time);
+    
+    // Keep only last 100 response times for rolling average
+    if (this.metrics.responseTimes.length > 100) {
+      this.metrics.responseTimes.shift();
+    }
+    
+    this.metrics.averageResponseTime = 
+      this.metrics.responseTimes.reduce((a, b) => a + b, 0) / 
+      this.metrics.responseTimes.length;
+  }
+  
+  logSuccess(endpoint, responseTime) {
+    console.log(`✅ ${endpoint} - ${responseTime}ms`);
+  }
+  
+  logError(endpoint, error, responseTime) {
+    console.error(`❌ ${endpoint} - ${responseTime}ms - ${error.info || error.message}`);
+  }
+  
+  getHealthReport() {
+    const successRate = (this.metrics.successfulRequests / this.metrics.totalRequests * 100).toFixed(2);
+    
+    return {
+      ...this.metrics,
+      successRate: `${successRate}%`,
+      averageResponseTime: `${this.metrics.averageResponseTime.toFixed(0)}ms`
+    };
+  }
+}
+
+// Usage
+const monitor = new APIMonitor('buderim_your_api_key_here');
+
+// Monitor requests
+const rates = await monitor.monitoredRequest('/latest');
+
+// Generate health report
+const report = monitor.getHealthReport();
+console.log('API Health Report:', report);
+```
+
+## Testing Strategies
+
+### Unit Testing
+Mock the API for reliable unit tests:
+
+```javascript
+// mock-exchange-rates.js
+class MockExchangeRatesAPI {
+  constructor() {
+    this.mockData = {
+      latest: {
+        success: true,
+        timestamp: 1725080400,
+        base: 'AUD',
+        date: '2025-08-31',
+        rates: {
+          USD: 0.643512,
+          EUR: 0.562934,
+          GBP: 0.487421
+        }
+      }
+    };
+  }
+  
+  async getLatestRates() {
+    return this.mockData.latest;
+  }
+  
+  setMockData(data) {
+    this.mockData.latest = data;
+  }
+  
+  simulateError(error) {
+    this.shouldError = error;
+  }
+  
+  async convert(from, to, amount) {
+    if (this.shouldError) {
+      throw this.shouldError;
+    }
+    
+    const rate = this.mockData.latest.rates[to];
+    return {
+      success: true,
+      query: { from, to, amount },
+      info: { rate },
+      result: amount * rate
+    };
+  }
+}
+
+// tests/currency-converter.test.js
+const assert = require('assert');
+const CurrencyConverter = require('../src/currency-converter');
+const MockExchangeRatesAPI = require('./mock-exchange-rates');
+
+describe('Currency Converter', () => {
+  let converter, mockAPI;
+  
+  beforeEach(() => {
+    mockAPI = new MockExchangeRatesAPI();
+    converter = new CurrencyConverter(mockAPI);
+  });
+  
+  it('should convert AUD to USD correctly', async () => {
+    const result = await converter.convert('AUD', 'USD', 100);
+    assert.strictEqual(result.result, 64.3512);
+  });
+  
+  it('should handle API errors gracefully', async () => {
+    mockAPI.simulateError(new Error('Rate limit exceeded'));
+    
+    try {
+      await converter.convert('AUD', 'USD', 100);
+      assert.fail('Should have thrown an error');
+    } catch (error) {
+      assert.strictEqual(error.message, 'Rate limit exceeded');
+    }
+  });
+  
+  it('should use cached rates when API fails', async () => {
+    // Set up cache
+    converter.setCachedRate('USD', 0.65);
+    
+    // Simulate API failure
+    mockAPI.simulateError(new Error('Network error'));
+    
+    const result = await converter.convertWithFallback('AUD', 'USD', 100);
+    assert.strictEqual(result.result, 65);
+    assert.strictEqual(result.fromCache, true);
+  });
+});
+```
+
+This comprehensive best practices guide covers all the essential aspects of building robust, performant, and secure applications with the Exchange Rates API. Following these patterns will help you create reliable currency conversion systems that handle edge cases gracefully and provide excellent user experiences.

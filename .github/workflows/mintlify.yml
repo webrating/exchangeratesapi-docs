@@ -1,0 +1,41 @@
+name: Deploy Mintlify Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Mintlify CLI
+        run: npm install -g mintlify
+        
+      - name: Validate Mintlify configuration
+        run: mintlify dev --port 3000 &
+        
+      - name: Wait for dev server
+        run: sleep 10
+        
+      - name: Test documentation build
+        run: |
+          curl -f http://localhost:3000 || exit 1
+          pkill -f "mintlify dev"
+        
+      - name: Deploy to Mintlify
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Documentation validated successfully"
+          echo "Mintlify will automatically deploy from this repository"
+          echo "Configure webhook at: https://dashboard.mintlify.com"

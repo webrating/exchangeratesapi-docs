@@ -1,0 +1,37 @@
+{
+  "name": "exchangeratesapi-docs",
+  "version": "1.0.0",
+  "description": "Documentation for the Exchange Rates API - Official Reserve Bank of Australia exchange rate data through modern REST endpoints",
+  "scripts": {
+    "dev": "mintlify dev",
+    "start": "mintlify dev",
+    "build": "mintlify build",
+    "preview": "mintlify dev",
+    "validate": "mintlify dev --port 3000"
+  },
+  "keywords": [
+    "exchange-rates",
+    "currency-api",
+    "rba",
+    "australia",
+    "documentation",
+    "api",
+    "mintlify"
+  ],
+  "author": "Exchange Rates API",
+  "license": "MIT",
+  "devDependencies": {
+    "mintlify": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/exchangeratesapi-docs.git"
+  },
+  "homepage": "https://docs.exchangeratesapi.com.au",
+  "bugs": {
+    "url": "https://github.com/your-username/exchangeratesapi-docs/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

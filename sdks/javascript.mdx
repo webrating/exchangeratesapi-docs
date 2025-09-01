@@ -1,0 +1,653 @@
+---
+title: 'JavaScript SDK'
+description: 'Official JavaScript/TypeScript SDK for the Exchange Rates API with examples for Node.js and browser environments'
+---
+
+## Installation
+
+<CodeGroup>
+
+```bash npm
+npm install @exchangeratesapi/javascript
+```
+
+```bash yarn
+yarn add @exchangeratesapi/javascript
+```
+
+```bash pnpm
+pnpm add @exchangeratesapi/javascript
+```
+
+</CodeGroup>
+
+<Note>
+The official JavaScript SDK is coming soon! For now, use the native fetch examples below or create your own wrapper class.
+</Note>
+
+## Quick Start
+
+### Node.js
+
+```javascript
+// Using ES modules
+import fetch from 'node-fetch'; // npm install node-fetch
+
+const API_KEY = process.env.EXCHANGE_RATES_API_KEY;
+const BASE_URL = 'https://api.exchangeratesapi.com.au';
+
+class ExchangeRatesAPI {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.baseURL = BASE_URL;
+  }
+
+  async getLatestRates() {
+    const response = await fetch(`${this.baseURL}/latest`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  async convert(from, to, amount, date = null) {
+    const params = new URLSearchParams({ from, to, amount: amount.toString() });
+    if (date) params.append('date', date);
+    
+    const response = await fetch(`${this.baseURL}/convert?${params}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  async getHistoricalRates(date) {
+    const response = await fetch(`${this.baseURL}/${date}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  async getTimeSeries(startDate, endDate, symbols = null) {
+    const params = new URLSearchParams({ 
+      start_date: startDate, 
+      end_date: endDate 
+    });
+    
+    if (symbols) {
+      params.append('symbols', Array.isArray(symbols) ? symbols.join(',') : symbols);
+    }
+    
+    const response = await fetch(`${this.baseURL}/timeseries?${params}`, {
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+}
+
+// Usage
+const api = new ExchangeRatesAPI(API_KEY);
+
+try {
+  const rates = await api.getLatestRates();
+  console.log('Current USD rate:', rates.rates.USD);
+  
+  const conversion = await api.convert('AUD', 'USD', 100);
+  console.log(`100 AUD = ${conversion.result} USD`);
+} catch (error) {
+  console.error('API Error:', error.message);
+}
+```
+
+### Browser (Modern)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exchange Rates Demo</title>
+</head>
+<body>
+    <div id="app">
+        <h1>AUD Exchange Rates</h1>
+        <div id="rates"></div>
+        <div id="converter">
+            <input type="number" id="amount" placeholder="Amount in AUD" />
+            <select id="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+            </select>
+            <button onclick="convertCurrency()">Convert</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        class ExchangeRatesAPI {
+            constructor(apiKey) {
+                this.apiKey = apiKey;
+                this.baseURL = 'https://api.exchangeratesapi.com.au';
+            }
+
+            async getLatestRates() {
+                const response = await fetch(`${this.baseURL}/latest`, {
+                    headers: { 'Authorization': `Bearer ${this.apiKey}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return response.json();
+            }
+
+            async convert(from, to, amount) {
+                const params = new URLSearchParams({ from, to, amount: amount.toString() });
+                
+                const response = await fetch(`${this.baseURL}/convert?${params}`, {
+                    headers: { 'Authorization': `Bearer ${this.apiKey}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return response.json();
+            }
+        }
+
+        // Replace with your actual API key
+        const api = new ExchangeRatesAPI('buderim_your_api_key_here');
+
+        async function loadRates() {
+            try {
+                const data = await api.getLatestRates();
+                const ratesDiv = document.getElementById('rates');
+                
+                const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY'];
+                const ratesList = majorCurrencies.map(currency => 
+                    `<div>${currency}: ${data.rates[currency].toFixed(4)}</div>`
+                ).join('');
+                
+                ratesDiv.innerHTML = `
+                    <h3>Latest Rates (${data.date})</h3>
+                    ${ratesList}
+                `;
+            } catch (error) {
+                console.error('Failed to load rates:', error);
+                document.getElementById('rates').innerHTML = 
+                    '<div style="color: red;">Failed to load rates</div>';
+            }
+        }
+
+        async function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const currency = document.getElementById('currency').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            try {
+                const result = await api.convert('AUD', currency, amount);
+                document.getElementById('result').innerHTML = 
+                    `${amount} AUD = ${result.result} ${currency}`;
+            } catch (error) {
+                console.error('Conversion failed:', error);
+                document.getElementById('result').innerHTML = 
+                    '<div style="color: red;">Conversion failed</div>';
+            }
+        }
+
+        // Load rates on page load
+        loadRates();
+    </script>
+</body>
+</html>
+```
+
+## TypeScript Support
+
+```typescript
+// types/exchange-rates.ts
+export interface ExchangeRateResponse {
+  success: boolean;
+  timestamp: number;
+  base: string;
+  date: string;
+  rates: Record<string, number>;
+  stale?: boolean;
+}
+
+export interface ConversionResponse {
+  success: boolean;
+  query: {
+    from: string;
+    to: string;
+    amount: number;
+  };
+  info: {
+    timestamp: number;
+    rate: number;
+  };
+  date: string;
+  result: number;
+}
+
+export interface TimeSeriesResponse {
+  success: boolean;
+  timeseries: boolean;
+  start_date: string;
+  end_date: string;
+  base: string;
+  rates: Record<string, Record<string, number>>;
+}
+
+export interface APIError {
+  success: false;
+  error: {
+    code: number;
+    type: string;
+    info: string;
+  };
+}
+
+export type Currency = 'AUD' | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CNY' | 'KRW' | 'SGD' | 
+  'NZD' | 'INR' | 'THB' | 'MYR' | 'IDR' | 'VND' | 'HKD' | 'PHP' | 'CAD' | 'CHF' | 
+  'TWD' | 'TWI' | 'SDR';
+```
+
+```typescript
+// exchange-rates-client.ts
+import type { 
+  ExchangeRateResponse, 
+  ConversionResponse, 
+  TimeSeriesResponse,
+  APIError,
+  Currency 
+} from './types/exchange-rates';
+
+export class ExchangeRatesClient {
+  private apiKey: string;
+  private baseURL: string = 'https://api.exchangeratesapi.com.au';
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  private async makeRequest<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      const error = data as APIError;
+      throw new Error(`API Error ${error.error.code}: ${error.error.info}`);
+    }
+
+    return data as T;
+  }
+
+  async getLatestRates(): Promise<ExchangeRateResponse> {
+    return this.makeRequest<ExchangeRateResponse>('/latest');
+  }
+
+  async getLatestRate(currency: Currency): Promise<ExchangeRateResponse> {
+    return this.makeRequest<ExchangeRateResponse>(`/latest/${currency}`);
+  }
+
+  async convert(
+    from: Currency, 
+    to: Currency, 
+    amount: number, 
+    date?: string
+  ): Promise<ConversionResponse> {
+    const params = new URLSearchParams({
+      from,
+      to,
+      amount: amount.toString()
+    });
+    
+    if (date) params.append('date', date);
+    
+    return this.makeRequest<ConversionResponse>(`/convert?${params}`);
+  }
+
+  async getHistoricalRates(date: string): Promise<ExchangeRateResponse> {
+    return this.makeRequest<ExchangeRateResponse>(`/${date}`);
+  }
+
+  async getHistoricalRate(date: string, currency: Currency): Promise<ExchangeRateResponse> {
+    return this.makeRequest<ExchangeRateResponse>(`/${date}/${currency}`);
+  }
+
+  async getTimeSeries(
+    startDate: string,
+    endDate: string,
+    symbols?: Currency[] | string
+  ): Promise<TimeSeriesResponse> {
+    const params = new URLSearchParams({
+      start_date: startDate,
+      end_date: endDate
+    });
+
+    if (symbols) {
+      const symbolsStr = Array.isArray(symbols) ? symbols.join(',') : symbols;
+      params.append('symbols', symbolsStr);
+    }
+
+    return this.makeRequest<TimeSeriesResponse>(`/timeseries?${params}`);
+  }
+
+  async getStatus(): Promise<{
+    status: string;
+    last_update: string;
+    stale: boolean;
+    region: string;
+  }> {
+    // Status endpoint doesn't require authentication
+    const response = await fetch(`${this.baseURL}/status`);
+    return response.json();
+  }
+}
+
+// Usage
+const client = new ExchangeRatesClient(process.env.EXCHANGE_RATES_API_KEY!);
+
+async function example() {
+  try {
+    const rates = await client.getLatestRates();
+    console.log('USD Rate:', rates.rates.USD);
+
+    const conversion = await client.convert('AUD', 'USD', 100);
+    console.log(`100 AUD = ${conversion.result} USD`);
+
+    const historicalRates = await client.getHistoricalRates('2024-01-01');
+    console.log('USD Rate on Jan 1, 2024:', historicalRates.rates.USD);
+
+    const timeSeries = await client.getTimeSeries(
+      '2024-01-01', 
+      '2024-01-31', 
+      ['USD', 'EUR']
+    );
+    console.log('January 2024 USD rates:', 
+      Object.entries(timeSeries.rates).map(([date, rates]) => 
+        `${date}: ${rates.USD}`
+      )
+    );
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+```
+
+## React Hooks
+
+```typescript
+// hooks/useExchangeRates.ts
+import { useState, useEffect } from 'react';
+import { ExchangeRatesClient } from '../exchange-rates-client';
+import type { ExchangeRateResponse } from '../types/exchange-rates';
+
+export function useExchangeRates(apiKey: string) {
+  const [client] = useState(() => new ExchangeRatesClient(apiKey));
+  const [rates, setRates] = useState<ExchangeRateResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchRates() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await client.getLatestRates();
+        
+        if (mounted) {
+          setRates(data);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch rates');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchRates();
+    
+    // Refresh every 30 minutes
+    const interval = setInterval(fetchRates, 30 * 60 * 1000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [client]);
+
+  const refresh = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await client.getLatestRates();
+      setRates(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh rates');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { rates, loading, error, refresh, client };
+}
+
+// Usage in component
+import React from 'react';
+import { useExchangeRates } from './hooks/useExchangeRates';
+
+export function ExchangeRateDisplay() {
+  const { rates, loading, error, refresh } = useExchangeRates(
+    process.env.REACT_APP_EXCHANGE_RATES_API_KEY!
+  );
+
+  if (loading) return <div>Loading exchange rates...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!rates) return <div>No data available</div>;
+
+  const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY'];
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Current Exchange Rates</h2>
+        <button onClick={refresh}>Refresh</button>
+      </div>
+      
+      <p>Last updated: {new Date(rates.timestamp * 1000).toLocaleString()}</p>
+      
+      {rates.stale && (
+        <div style={{ color: 'orange', padding: '10px', background: '#fff3cd' }}>
+          ⚠️ Data may be stale. RBA rates are typically updated at 4 PM AEST.
+        </div>
+      )}
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        {majorCurrencies.map(currency => (
+          <div key={currency} style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+            <h3>{currency}</h3>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+              {rates.rates[currency].toFixed(4)}
+            </p>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>
+              1 AUD = {rates.rates[currency].toFixed(4)} {currency}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Error Handling Best Practices
+
+```javascript
+class ExchangeRatesAPIWithRetry {
+  constructor(apiKey, options = {}) {
+    this.apiKey = apiKey;
+    this.baseURL = 'https://api.exchangeratesapi.com.au';
+    this.maxRetries = options.maxRetries || 3;
+    this.retryDelay = options.retryDelay || 1000; // ms
+  }
+
+  async makeRequestWithRetry(endpoint, attempt = 1) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${this.apiKey}` },
+        timeout: 10000 // 10 second timeout
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        const error = new Error(data.error.info);
+        error.code = data.error.code;
+        error.type = data.error.type;
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn(`Attempt ${attempt} failed:`, error.message);
+
+      // Don't retry authentication or client errors
+      if (error.code >= 400 && error.code < 500) {
+        throw error;
+      }
+
+      // Retry network errors and server errors
+      if (attempt < this.maxRetries) {
+        await this.delay(this.retryDelay * attempt);
+        return this.makeRequestWithRetry(endpoint, attempt + 1);
+      }
+
+      throw error;
+    }
+  }
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async getLatestRatesSafe() {
+    try {
+      return await this.makeRequestWithRetry('/latest');
+    } catch (error) {
+      console.error('Failed to fetch latest rates after retries:', error);
+      
+      // Return cached data if available
+      const cached = this.getCachedRates();
+      if (cached) {
+        console.warn('Using cached rates due to API failure');
+        return { ...cached, fromCache: true };
+      }
+      
+      // Final fallback
+      throw new Error('Unable to fetch exchange rates. Please try again later.');
+    }
+  }
+
+  getCachedRates() {
+    // Implement your caching logic here
+    // Could use localStorage, Redis, file system, etc.
+    try {
+      const cached = localStorage.getItem('exchange_rates_cache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        // Check if cache is less than 1 hour old
+        if (Date.now() - data.cachedAt < 3600000) {
+          return data.rates;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load cached rates:', error);
+    }
+    return null;
+  }
+
+  setCachedRates(rates) {
+    try {
+      const cacheData = {
+        rates,
+        cachedAt: Date.now()
+      };
+      localStorage.setItem('exchange_rates_cache', JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn('Failed to cache rates:', error);
+    }
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Python SDK"
+    icon="python"
+    href="/sdks/python"
+  >
+    Python examples and best practices
+  </Card>
+  <Card
+    title="PHP SDK"
+    icon="php"
+    href="/sdks/php"
+  >
+    PHP examples and Laravel integration
+  </Card>
+  <Card
+    title="cURL Examples"
+    icon="terminal"
+    href="/sdks/curl"
+  >
+    Command-line examples and shell scripts
+  </Card>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api-reference"
+  >
+    Complete API documentation
+  </Card>
+</CardGroup>
