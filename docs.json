@@ -97,6 +97,11 @@
           "anchor": "Status",
           "href": "https://status.exchangeratesapi.com.au",
           "icon": "wifi"
+        },
+        {
+          "anchor": "Changelog",
+          "href": "https://docs.exchangeratesapi.com.au/changelog",
+          "icon": "bolt"
         }
       ]
     }
@@ -134,10 +139,6 @@
           {
             "label": "Legal",
             "href": "https://docs.exchangeratesapi.com.au/legal/legal"
-          },
-          {
-            "label": "Compliance",
-            "href": "https://docs.exchangeratesapi.com.au/legal/compliance"
           }
         ]
       }

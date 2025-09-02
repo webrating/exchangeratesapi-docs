@@ -3,248 +3,66 @@ title: 'Changelog'
 description: 'Track all changes, updates, and new features added to the Exchange Rates API'
 ---
 
-## Version 1.0.0 - September 1, 2025
+## Version 1.0.0 - September 2, 2025
 
-### 🎉 Initial Production Release
+### Initial Production Release
 
-**Core API Features**
-- ✅ **8 Production Endpoints**: All core functionality live and tested
-- ✅ **Real-time RBA Data**: Daily updates at 4:00 PM AEST with automatic fallback
-- ✅ **Historical Data**: Complete backfill from 2018 onwards (32,165+ records)
-- ✅ **21 Supported Currencies**: All RBA-published currencies including TWI and SDR
+**Core API**
+- 8 production endpoints
+- Real-time RBA data (daily updates)
+- Historical data from 2018 onwards
+- 21 supported currencies including TWI and SDR
 
-**Authentication & Security**
-- ✅ **Unique API Keys**: Australian suburb-based prefixes (e.g., `buderim_abc123...`)
-- ✅ **Bearer Token Auth**: Industry-standard authentication with proper security headers
-- ✅ **Plan-based Access Control**: Free, Starter, Professional, and Business tiers
-- ✅ **Rate Limiting**: Daily quotas with proper headers and graceful degradation
+**Authentication**
+- Bearer token authentication
+- Australian suburb-based API key prefixes
+- Plan-based rate limiting (Free: 50/day, Starter: 1,000/day, Professional: 10,000/day, Business: unlimited)
 
 **Infrastructure**
-- ✅ **Cloudflare Workers**: Global edge deployment for <100ms response times
-- ✅ **Custom Domains**: Production domains for API, dashboard, and auth services
-- ✅ **D1 Database**: Historical data storage with micro-unit precision
-- ✅ **KV Storage**: Hot data caching and rate limiting counters
+- Cloudflare Workers global deployment
+- D1 database for historical data
+- KV storage for caching and rate limits
 
-**User Experience**
-- ✅ **Complete Dashboard**: User registration, API key management, usage analytics
-- ✅ **Magic Link Authentication**: Passwordless login with cross-subdomain sessions
-- ✅ **Usage Tracking**: Real-time quota monitoring and billing integration
+### Endpoints
 
-### 🎯 Supported Endpoints
+**Public (no auth)**
+- `GET /status` - API status
+- `GET /symbols` - Supported currencies  
+- `GET /convert` - Free conversion (3/hour per IP)
 
-**Public Endpoints (No Authentication Required)**
-- `GET /status` - API operational status and data freshness
-- `GET /symbols` - Complete list of supported currencies with metadata
-- `GET /convert` - Free conversion (3 requests/hour per IP)
+**Authenticated**
+- `GET /latest` - Current rates
+- `GET /latest/{currency}` - Current rate for currency
+- `GET /{date}` - Historical rates
+- `GET /{date}/{currency}` - Historical rate for currency
+- `GET /timeseries` - Date range rates
+- `GET /convert` - Unlimited conversions
 
-**Authenticated Endpoints**
-- `GET /latest` - Current exchange rates for all currencies
-- `GET /latest/{currency}` - Current rate for a specific currency
-- `GET /{date}` - Historical rates for any date since 2018
-- `GET /{date}/{currency}` - Historical rate for specific currency and date
-- `GET /timeseries` - Exchange rates for date ranges (up to 365 days)
-- `GET /convert` - Unlimited currency conversion with optional historical dates
+### Supported Currencies
 
-**Admin Endpoints**
-- `POST /admin/create-user` - User account management
-- `GET /admin/db-status` - Database health and statistics
+**Major:** USD, EUR, GBP, JPY, CHF, CAD
 
-### 🌏 Supported Currencies
+**Asia-Pacific:** CNY, KRW, SGD, NZD, HKD, TWD, INR, THB, MYR, IDR, VND, PHP
 
-**Major Global Currencies**
-- USD, EUR, GBP, JPY, CHF, CAD
+**Special:** TWI (Trade-Weighted Index), SDR (Special Drawing Rights)
 
-**Asia-Pacific Region**  
-- CNY, KRW, SGD, NZD, HKD, TWD, INR, THB, MYR, IDR, VND, PHP
-
-**Special Instruments**
-- TWI (Trade-Weighted Index) - Australia's currency strength indicator
-- SDR (Special Drawing Rights) - International Monetary Fund reserve asset
-
-### 📊 Rate Limits by Plan
-
-| Plan | Requests/Day | Historical Access | Price (AUD/month) |
-|------|--------------|-------------------|-------------------|
-| **Free** | 50 | Latest only | $0 |
-| **Starter** | 1,000 | 90 days | $19 |
-| **Professional** | 10,000 | Full (2018+) | $79 |
-| **Business** | Unlimited | Full + Premium | $249 |
-
-### 🔄 Data Pipeline
-
-**Update Schedule**
-- **RBA Source**: 4:00 PM AEST daily (Monday-Friday, excluding holidays)
-- **API Update**: 4:05-4:15 PM AEST with automatic validation
-- **Fallback System**: Previous day's rates if RBA unavailable
-
-**Data Quality**
-- **Precision**: Micro-unit integer storage (×1,000,000) to avoid floating-point errors
-- **Validation**: Automatic consistency checks and outlier detection
-- **Staleness Detection**: Headers indicate when data is older than expected
-
-### 🛡️ Security Features
-
-**API Key Security**
-- SHA-256 hashing - raw keys never stored
-- Unique suburb prefixes for memorable, branded keys
-- Rate limiting per key with proper quota tracking
-- Revocation system with immediate effect
-
-**Request Security**
-- HTTPS mandatory for all endpoints
-- Security headers (HSTS, CSP, X-Frame-Options)
-- IP-based rate limiting for free endpoints
-- Request ID tracking for debugging
-
-### 🌐 Global Performance
-
-**Edge Deployment**
-- Cloudflare Workers in 300+ locations worldwide
-- Average response times: <50ms (Australia), <100ms (Asia-Pacific), <200ms (Global)
-- 99.9% uptime SLA for paid plans
-
-**Caching Strategy**
-- Public endpoints: Cached at edge
-- Authenticated endpoints: No-store to prevent data leakage
-- Historical data: Long-term caching (data never changes)
-
----
-
-## Upcoming Features
-
-### Version 1.1.0 - Q4 2025 (Planned)
-
-**Enhanced API Features**
-- 🔄 **Webhooks**: Real-time notifications for rate updates
-- 📊 **CSV Export**: Bulk data export for analysis
-- 🔍 **GraphQL Endpoint**: Modern query interface
-- 📈 **Rate Change Alerts**: Threshold-based notifications
-
-**Developer Experience**
-- 📦 **Official SDKs**: JavaScript/TypeScript, Python, PHP, Go
-- 🔧 **Postman Collection**: Auto-generated from OpenAPI spec
-- 📋 **OpenAPI 3.1**: Complete specification for code generation
-- 🧪 **Sandbox Environment**: Test keys and mock data
-
-**Platform Integrations**
-- 🛍️ **Shopify Plugin**: E-commerce currency conversion
-- 📝 **WordPress Plugin**: Content localization
-- 📊 **Google Sheets Add-on**: Live rate imports
-- ⚡ **Zapier Integration**: Workflow automation
-
-### Version 1.2.0 - Q1 2026 (Planned)
-
-**Advanced Features**
-- 🤖 **AI-Powered Forecasting**: Rate prediction models
-- 📊 **Advanced Analytics**: Usage insights and trends
-- 🔐 **Enterprise SSO**: SAML, OAuth2, JWT authentication
-- 🏢 **Multi-tenant Management**: Organization accounts
-
-**Expanded Data Sources**
-- 🏦 **Additional Central Banks**: ECB, Fed, BoE rates
-- 💱 **Cryptocurrency**: Major crypto exchange rates
-- 🏛️ **Government Bonds**: Yield curve data
-- 📊 **Economic Indicators**: GDP, inflation, unemployment
-
----
-
-## Bug Fixes & Improvements
+## Bug Fixes
 
 ### September 2025
-
-**Week 1 (Sep 1-7)**
-- 🐛 **Fixed**: React dashboard compatibility issues causing blank pages
-- 🐛 **Fixed**: CORS configuration for cross-subdomain authentication
-- 🐛 **Fixed**: Rate limiting logic separation between account and API usage
-- ✨ **Improved**: API key masking with suburb prefixes
-- ✨ **Improved**: Account status management for revoked keys
+- Fixed React dashboard compatibility
+- Fixed CORS configuration 
+- Fixed rate limiting logic
+- Improved API key masking
 
 ### August 2025
+- Fixed DST timezone handling
+- Fixed historical data precision
+- Added comprehensive error responses
+- Added request ID tracking
+- Improved response times
 
-**Week 4 (Aug 25-31)**
-- 🐛 **Fixed**: DST timezone handling for cron jobs
-- 🐛 **Fixed**: Historical data precision issues
-- ✨ **Added**: Comprehensive error responses with proper HTTP status codes
-- ✨ **Added**: Request ID tracking for debugging support
+## Support
 
-**Week 3 (Aug 18-24)**
-- 🐛 **Fixed**: KV consistency issues for rate limiting
-- ✨ **Added**: WAF rules for free endpoint protection
-- ✨ **Added**: Fallback system for RBA unavailability
-- ✨ **Improved**: Response time optimization (<100ms p95)
-
----
-
-## API Changes
-
-### Breaking Changes
-None - Version 1.0.0 is the initial release.
-
-### Deprecations  
-None - All endpoints are current and supported.
-
-### New Features
-All features in version 1.0.0 are new.
-
----
-
-## Migration Guides
-
-Since this is the initial release, no migrations are required. For users planning to integrate:
-
-### From Other Exchange Rate APIs
-
-<AccordionGroup>
-  <Accordion title="From Fixer.io" icon="rotate">
-    **Key Differences:**
-    - Base currency is AUD (not EUR)
-    - Australian focus with RBA official data
-    - Different authentication (Bearer tokens vs query params)
-    
-    **Migration Steps:**
-    1. Update base URL to `https://api.exchangeratesapi.com.au`
-    2. Change authentication from `access_key` param to `Authorization: Bearer` header
-    3. Update rate calculations for AUD base currency
-  </Accordion>
-  
-  <Accordion title="From ExchangeRate-API.com" icon="rotate">
-    **Key Differences:**
-    - Official RBA data source
-    - Required authentication for production use
-    - More comprehensive historical data
-    
-    **Migration Steps:**
-    1. Sign up for API key at [app.exchangeratesapi.com.au](https://app.exchangeratesapi.com.au)
-    2. Update endpoints to use authentication
-    3. Adjust for AUD base currency
-  </Accordion>
-</AccordionGroup>
-
-### Breaking Change Policy
-
-We are committed to API stability and will:
-- Provide **90 days minimum notice** for any breaking changes
-- Use **semantic versioning** for major/minor/patch releases
-- Maintain **backwards compatibility** within major versions
-- Offer **migration guides** and transition periods for major changes
-
----
-
-## Support & Feedback
-
-### Reporting Issues
-- 📧 **Email**: [support@exchangeratesapi.com.au](mailto:support@exchangeratesapi.com.au)
-- 🔗 **Status Page**: [status.exchangeratesapi.com.au](https://status.exchangeratesapi.com.au)
-- 📱 **Dashboard**: [app.exchangeratesapi.com.au](https://app.exchangeratesapi.com.au)
-
-### Feature Requests
-We prioritize features based on:
-1. **Customer feedback** and usage patterns
-2. **Business value** and technical feasibility  
-3. **Alignment** with our Australian financial data mission
-
-Vote on upcoming features and suggest new ones through our dashboard feedback system.
-
----
-
-*Last updated: September 1, 2025*
+- Email: [support@exchangeratesapi.com.au](mailto:support@exchangeratesapi.com.au)
+- Status: [status.exchangeratesapi.com.au](https://status.exchangeratesapi.com.au)
+- Dashboard: [app.exchangeratesapi.com.au](https://app.exchangeratesapi.com.au)
