@@ -369,7 +369,7 @@ export class ExchangeRatesClient {
     status: string;
     last_update: string;
     stale: boolean;
-    region: string;
+    next_update_expected: string;
   }> {
     // Status endpoint doesn't require authentication
     const response = await fetch(`${this.baseURL}/status`);
