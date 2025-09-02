@@ -1,0 +1,271 @@
+---
+title: 'Troubleshooting'
+description: 'Common issues and solutions for the Exchange Rates API'
+---
+
+## Authentication Problems
+
+<AccordionGroup>
+  <Accordion title="Invalid API Key Error (401)" icon="key">
+    **Symptoms:**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": 401,
+        "type": "invalid_api_key",
+        "info": "Invalid or missing API key."
+      }
+    }
+    ```
+    
+    **Solutions:**
+    1. Check API key format: Should be `buderim_abc123...` (suburb prefix + identifier)
+    2. Verify Authorization header: Use `Authorization: Bearer your_api_key_here`
+    3. Check for typos: API keys are case-sensitive
+    4. Confirm key is active: Check dashboard for revoked keys
+    5. Test with cURL:
+    ```bash
+    curl -H "Authorization: Bearer buderim_your_api_key" \
+         https://api.exchangeratesapi.com.au/status
+    ```
+  </Accordion>
+  
+  <Accordion title="Account Suspended (401)" icon="ban">
+    **Symptoms:**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": 401,
+        "type": "account_suspended",
+        "info": "Account is suspended. Please contact support."
+      }
+    }
+    ```
+    
+    **Common Causes:**
+    - Overdue payment on paid plans
+    - Terms of service violations
+    - Suspicious activity detection
+    - Billing card issues
+    
+    **Solutions:**
+    1. Check dashboard for account status
+    2. Update payment method if billing-related
+    3. Contact support at [support@exchangeratesapi.com.au](mailto:support@exchangeratesapi.com.au)
+  </Accordion>
+</AccordionGroup>
+
+## Rate Limiting Issues
+
+<AccordionGroup>
+  <Accordion title="Daily Quota Exceeded (429)" icon="gauge">
+    **Symptoms:**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": 429,
+        "type": "rate_limit_exceeded",
+        "info": "Daily quota of 1000 requests exceeded. Quota resets at midnight AEST."
+      }
+    }
+    ```
+    
+    **Immediate Solutions:**
+    1. Wait for reset: Quotas reset at midnight AEST
+    2. Check usage: Monitor quota in dashboard
+    3. Implement caching: Reduce API calls by caching responses
+    4. Upgrade plan: Increase daily quota
+    
+    **Prevention:**
+    - Cache exchange rates (they update once daily at 4 PM AEST)
+    - Batch multiple currency needs into single `/latest` calls
+    - Monitor quota usage proactively
+  </Accordion>
+  
+  <Accordion title="Free Tier Limit Exceeded (429)" icon="clock">
+    **Symptoms:**
+    - Free `/convert` endpoint returns 429 error
+    - Header: `X-RateLimit-Remaining: 0`
+    
+    **Solutions:**
+    1. Wait 1 hour: Free tier allows 3 requests per hour per IP
+    2. Sign up: Get 50 requests/day with free account
+    3. Use different endpoint: Try `/latest` with conversion math
+    4. Upgrade plan: Get unlimited conversion requests
+  </Accordion>
+</AccordionGroup>
+
+## Data Quality Issues
+
+<AccordionGroup>
+  <Accordion title="Stale Data Warning" icon="exclamation-triangle">
+    **Symptoms:**
+    - Response headers: `X-Data-Stale: true`
+    - Response field: `"stale": true`
+    - Data older than expected
+    
+    **Explanation:**
+    - RBA typically updates at 4:00 PM AEST Monday-Friday
+    - If RBA doesn't update (holidays, technical issues), we serve previous day's rates
+    - This ensures API availability even when source data is delayed
+    
+    **Actions:**
+    1. No action needed: System automatically recovers when RBA updates
+    2. Check RBA directly: [rba.gov.au](https://www.rba.gov.au/statistics/frequency/exchange-rates.html)
+    3. Monitor status: Check status page
+  </Accordion>
+  
+  <Accordion title="Historical Data Not Available (404)" icon="calendar-times">
+    **Symptoms:**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": 404,
+        "type": "not_found",
+        "info": "No data available for date 2017-12-31"
+      }
+    }
+    ```
+    
+    **Causes:**
+    - Date before January 1, 2018 (our historical data start date)
+    - Weekend or Australian public holiday (RBA doesn't publish rates)
+    - Date in the future
+    
+    **Solutions:**
+    1. Use valid date range: 2018-01-01 to yesterday
+    2. Skip weekends: RBA only publishes Monday-Friday
+    3. Check Australian holidays
+  </Accordion>
+</AccordionGroup>
+
+## Technical Issues
+
+<AccordionGroup>
+  <Accordion title="Network Timeouts" icon="wifi">
+    **Symptoms:**
+    - Connection timeouts
+    - DNS resolution failures
+    - Intermittent connectivity issues
+    
+    **Solutions:**
+    1. Check internet connection: Verify basic connectivity
+    2. Test with cURL: `curl -I https://api.exchangeratesapi.com.au/status`
+    3. Check corporate firewall: Ensure HTTPS (port 443) is allowed
+    4. Implement retries: Use exponential backoff for transient failures
+    5. Monitor status page: Check for known issues
+  </Accordion>
+  
+  <Accordion title="CORS Errors in Browser" icon="globe">
+    **Symptoms:**
+    - CORS policy blocks in browser console
+    - Preflight OPTIONS requests failing
+    
+    **Explanation:**
+    - API keys should not be used in frontend JavaScript
+    - Browser security prevents direct API calls from websites
+    
+    **Solutions:**
+    1. Use backend proxy: Make API calls from your server
+    2. For testing only: Use free `/convert` endpoint (no auth required)
+    3. Example backend endpoint:
+    ```javascript
+    app.get('/api/rates', async (req, res) => {
+      const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
+        headers: { 'Authorization': `Bearer ${process.env.API_KEY}` }
+      });
+      const data = await response.json();
+      res.json(data);
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting Checklist
+
+### Quick Diagnostic Steps
+
+<Steps>
+  <Step title="Test API Status">
+    ```bash
+    curl https://api.exchangeratesapi.com.au/status
+    ```
+    Should return `"status": "operational"`
+  </Step>
+  
+  <Step title="Verify Authentication">
+    ```bash
+    curl -H "Authorization: Bearer your_api_key_here" \
+         https://api.exchangeratesapi.com.au/latest
+    ```
+    Should return exchange rate data
+  </Step>
+  
+  <Step title="Check Quota Usage">
+    Look for rate limit headers in response:
+    ```
+    X-RateLimit-Limit-Daily: 1000
+    X-RateLimit-Remaining-Daily: 847
+    ```
+  </Step>
+  
+  <Step title="Review Error Response">
+    All errors include structured information:
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": 400,
+        "type": "bad_request",
+        "info": "Detailed error message"
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+## Information to Include When Contacting Support
+
+When emailing support, please include:
+
+**Account Information**
+- Your email address (registered account)
+- API key prefix (e.g., "buderim_***" - never share the full key)
+- Your current plan (Free, Starter, Professional, Business)
+
+**Issue Details**
+- What you're trying to do: Specific endpoint and use case
+- What's happening: Exact error messages and HTTP status codes
+- When it started: Timestamp and timezone of first occurrence
+- Frequency: Is it consistent or intermittent?
+
+**Technical Details**
+- Request ID: From `X-Request-Id` header if available
+- Full cURL command (with API key redacted):
+  ```bash
+  curl -v -H "Authorization: Bearer buderim_***REDACTED***" \
+       https://api.exchangeratesapi.com.au/latest
+  ```
+- Programming language and libraries used
+- Network environment: Corporate firewall, proxy, cloud provider
+
+**Sample Request/Response**
+```bash
+# Request
+curl -H "Authorization: Bearer buderim_***REDACTED***" \
+     https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100
+
+# Response (example)
+{
+  "success": false,
+  "error": {
+    "code": 429,
+    "type": "rate_limit_exceeded", 
+    "info": "Daily quota exceeded"
+  }
+}
+```

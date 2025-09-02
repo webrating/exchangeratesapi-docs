@@ -76,18 +76,6 @@
             ]
           }
         ]
-      },
-      {
-        "tab": "Legal",
-        "groups": [
-          {
-            "group": "Legal",
-            "pages": [
-              "legal/legal",
-              "legal/compliance"
-            ]
-          }
-        ]
       }
     ],
     "global": {
@@ -106,11 +94,6 @@
           "anchor": "Status",
           "href": "https://status.exchangeratesapi.com.au",
           "icon": "wifi"
-        },
-        {
-          "anchor": "Support",
-          "href": "mailto:support@exchangeratesapi.com.au",
-          "icon": "envelope"
         }
       ]
     }
@@ -118,7 +101,7 @@
   "navbar": {
     "links": [
       {
-        "label": "Website",
+        "label": "www.exchangeratesapi.com.au",
         "href": "https://www.exchangeratesapi.com.au"
       }
     ],
@@ -143,19 +126,15 @@
   "footer": {
     "links": [
       {
-        "header": "Resources",
+        "header": "Legal",
         "items": [
           {
             "label": "Customers",
-            "href": "https://example.com/customers"
+            "href": "https://docs.exchangeratesapi.com.au/legal/legal"
           },
           {
             "label": "Enterprise",
-            "href": "https://example.com/enterprise"
-          },
-          {
-            "label": "Request Preview",
-            "href": "https://example.com/preview"
+            "href": "https://docs.exchangeratesapi.com.au/legal/compliance"
           }
         ]
       }

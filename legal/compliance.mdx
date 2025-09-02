@@ -5,42 +5,41 @@ description: 'ATO compliance, RBA attribution, and regulatory requirements for u
 
 ## Overview
 
-The Exchange Rates API provides official Reserve Bank of Australia (RBA) exchange rates to help Australian businesses meet regulatory and compliance requirements. This guide covers key compliance considerations for different use cases.
+Exchange Rates API provides Reserve Bank of Australia (RBA) exchange rates for Australian business regulatory compliance. This guide covers compliance requirements for different use cases.
 
 <Note>
-This guide provides general information only and doesn't constitute legal or accounting advice. Consult with qualified professionals for your specific requirements.
+This guide provides general information only. Consult qualified professionals for specific requirements.
 </Note>
 
 ## ATO Compliance
 
 ### Currency Conversion Requirements
 
-The Australian Taxation Office (ATO) requires businesses to convert foreign currency amounts to Australian dollars for tax purposes using **reasonable exchange rates**.
+The ATO requires businesses to convert foreign currency amounts to AUD for tax purposes using reasonable exchange rates.
 
-<Card title="ATO Acceptable Methods" icon="check-circle">
+<Card title="ATO Acceptable Methods" icon="check">
 
-The ATO accepts the following exchange rate sources:
--  **Reserve Bank of Australia (RBA)** - Our primary source
--  **Published rates from major banks**
--  **Recognized financial publications**
+The ATO accepts these exchange rate sources:
+- Reserve Bank of Australia (RBA) - our primary source
+- Published rates from major banks
+- Recognized financial publications
 
-Our API provides official RBA rates, making it fully compliant for ATO reporting.
+Our API provides official RBA rates, making it ATO compliant.
 
 </Card>
 
 ### Record Keeping Requirements
 
 <AccordionGroup>
-  <Accordion title="Transaction Records" icon="file-text">
+  <Accordion title="Transaction Records" icon="file">
     For each foreign currency transaction, maintain:
-    - **Original foreign currency amount**
-    - **Exchange rate used** (rate and source)
-    - **AUD equivalent amount** 
-    - **Date of transaction**
-    - **Date rate was obtained** (if different)
+    - Original foreign currency amount
+    - Exchange rate used (rate and source)
+    - AUD equivalent amount
+    - Date of transaction
+    - Date rate was obtained (if different)
     
     ```json
-    // Example API response for record keeping
     {
       "success": true,
       "query": {
@@ -60,18 +59,18 @@ Our API provides official RBA rates, making it fully compliant for ATO reporting
   
   <Accordion title="Exchange Rate Evidence" icon="receipt">
     The ATO requires evidence of exchange rates used:
-    - **API response logs** with timestamps
-    - **Source attribution** (RBA via Exchange Rates API)
-    - **Rate calculation method** (documented process)
-    - **Consistency** in rate selection methodology
+    - API response logs with timestamps
+    - Source attribution (RBA via Exchange Rates API)
+    - Rate calculation method (documented process)
+    - Consistency in rate selection methodology
     
     Store API responses with X-Request-Id for audit trails.
   </Accordion>
   
   <Accordion title="GST on Digital Services" icon="calculator">
     For international B2B services:
-    - Convert foreign currency invoices at **transaction date**
-    - Use consistent rate source throughout reporting period  
+    - Convert foreign currency invoices at transaction date
+    - Use consistent rate source throughout reporting period
     - Document rate selection methodology
     - Maintain 5-year record retention
   </Accordion>
@@ -90,7 +89,6 @@ class ATOCompliantConverter {
   
   async convertForATO(amount, fromCurrency, transactionDate) {
     try {
-      // Use specific historical date for transaction
       const response = await fetch(
         `https://api.exchangeratesapi.com.au/convert?` +
         `from=${fromCurrency}&to=AUD&amount=${amount}&date=${transactionDate}`,
@@ -101,7 +99,6 @@ class ATOCompliantConverter {
       
       const data = await response.json();
       
-      // Create audit record for ATO compliance
       const auditRecord = {
         transactionDate,
         originalAmount: amount,
@@ -128,7 +125,6 @@ class ATOCompliantConverter {
     }
   }
   
-  // Export audit trail for ATO records
   getAuditTrail(startDate, endDate) {
     return this.auditLog.filter(record => 
       record.transactionDate >= startDate && 
@@ -153,7 +149,6 @@ class ATOCompliantConverter:
     
     def convert_for_ato(self, amount: float, from_currency: str, 
                        transaction_date: str) -> Dict:
-        """Convert foreign currency to AUD with ATO compliance logging"""
         
         params = {
             "from": from_currency,
@@ -173,7 +168,6 @@ class ATOCompliantConverter:
         
         data = response.json()
         
-        # Create ATO compliance record
         audit_record = {
             "transaction_date": transaction_date,
             "original_amount": amount,
@@ -195,7 +189,6 @@ class ATOCompliantConverter:
         }
     
     def export_audit_trail(self, start_date: str, end_date: str) -> str:
-        """Export audit trail for ATO submission"""
         
         filtered_records = [
             record for record in self.audit_log
@@ -212,26 +205,24 @@ class ATOCompliantConverter:
 ### Legal Requirements
 
 <Warning>
-**Mandatory Attribution**: You must properly attribute RBA as the data source in all applications using our API.
+Mandatory Attribution: You must properly attribute RBA as the data source in all applications using our API.
 </Warning>
 
 #### Required Attribution Text
 
-Include this attribution in your application:
+<Card title="Standard Attribution" icon="quote">
 
-<Card title="Standard Attribution" icon="quote-right">
-
-> "Exchange rate data sourced from the Reserve Bank of Australia via Exchange Rates API. This service is not affiliated with or endorsed by the RBA."
+"Exchange rate data sourced from the Reserve Bank of Australia via Exchange Rates API. This service is not affiliated with or endorsed by the RBA."
 
 </Card>
 
 #### Where to Include Attribution
 
-- **Applications**: Footer or about section
-- **Reports**: Header or footer with data source
-- **Documentation**: API usage sections
-- **Invoices**: Small print or methodology notes
-- **Websites**: Footer or terms page
+- Applications: Footer or about section
+- Reports: Header or footer with data source
+- Documentation: API usage sections
+- Invoices: Small print or methodology notes
+- Websites: Footer or terms page
 
 ### Implementation Examples
 
@@ -256,7 +247,6 @@ via Exchange Rates API. Data accurate as of ${rateDate}.
 Not affiliated with or endorsed by the RBA.
 `;
 
-// Add to PDF footer or metadata
 doc.text(attribution, { fontSize: 8, align: 'center' });
 ```
 
@@ -269,18 +259,18 @@ doc.text(attribution, { fontSize: 8, align: 'center' });
 For businesses following Australian Accounting Standards Board (AASB) requirements:
 
 <AccordionGroup>
-  <Accordion title="AASB 121 - Foreign Currency" icon="book-open">
-    **Exchange Rate Selection:**
-    - Use **spot rate** at transaction date
-    - For practical reasons, use **average rate** for period if appropriate
-    - Ensure **consistent application** across reporting periods
+  <Accordion title="AASB 121 - Foreign Currency" icon="book">
+    Exchange Rate Selection:
+    - Use spot rate at transaction date
+    - For practical reasons, use average rate for period if appropriate
+    - Ensure consistent application across reporting periods
     
     Our API provides both historical spot rates and period averages via `/timeseries`.
   </Accordion>
   
   <Accordion title="Fair Value Measurements" icon="balance-scale">
     When using exchange rates for fair value:
-    - Rates must be from **principal (or most advantageous) market**
+    - Rates must be from principal (or most advantageous) market
     - RBA rates represent the principal Australian market
     - Document rate source and methodology
     - Maintain consistency across reporting periods
@@ -288,10 +278,10 @@ For businesses following Australian Accounting Standards Board (AASB) requiremen
   
   <Accordion title="Disclosure Requirements" icon="eye">
     Financial statements must disclose:
-    - **Exchange rate policy** (source and timing)
-    - **Significant rate changes** during period
-    - **Methods used** for translation
-    - **Functional vs presentation currency** considerations
+    - Exchange rate policy (source and timing)
+    - Significant rate changes during period
+    - Methods used for translation
+    - Functional vs presentation currency considerations
   </Accordion>
 </AccordionGroup>
 
@@ -311,7 +301,6 @@ async function getPeriodAverageRate(fromCurrency, startDate, endDate) {
   
   const data = await response.json();
   
-  // Calculate period average
   const rates = Object.values(data.rates).map(day => day[fromCurrency]);
   const averageRate = rates.reduce((sum, rate) => sum + rate, 0) / rates.length;
   
@@ -323,14 +312,10 @@ async function getPeriodAverageRate(fromCurrency, startDate, endDate) {
     source: 'Reserve Bank of Australia'
   };
 }
-
-// Usage for quarterly reporting
-const q1Average = await getPeriodAverageRate('USD', '2025-01-01', '2025-03-31');
 ```
 
 ```python Period-End Rates  
 def get_period_end_rate(currency: str, period_end_date: str) -> Dict:
-    """Get exchange rate for financial reporting period end"""
     
     url = f"https://api.exchangeratesapi.com.au/{period_end_date}/{currency}"
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -339,15 +324,13 @@ def get_period_end_rate(currency: str, period_end_date: str) -> Dict:
     data = response.json()
     
     if not data["success"]:
-        # If period end falls on weekend/holiday, get last available rate
         return get_last_available_rate(currency, period_end_date)
     
     return {
         "rate": data["rates"][currency],
         "date": data["date"],
         "period_end": period_end_date,
-        "source": "Reserve Bank of Australia",
-        "note": "Official period-end rate for financial reporting"
+        "source": "Reserve Bank of Australia"
     }
 ```
 
@@ -361,12 +344,12 @@ Although this API serves financial data (not personal data), some considerations
 
 <Card title="Data Processing" icon="shield">
 
-**What We Process:**
+What We Process:
 - API usage patterns (for rate limiting)
 - Request metadata (for debugging)
 - Account information (for authentication)
 
-**What We Don't Process:**
+What We Don't Process:
 - End-user personal data
 - Transaction details beyond API parameters
 - Customer business data
@@ -384,10 +367,10 @@ Although this API serves financial data (not personal data), some considerations
 
 ### Cross-Border Data
 
-- **API servers**: Located in Australia (Cloudflare edge network)
-- **Data sovereignty**: Complies with Australian data residency
-- **International access**: Available globally via CDN
-- **No data export**: Exchange rates are public information
+- API servers: Located in Australia (Cloudflare edge network)
+- Data sovereignty: Complies with Australian data residency
+- International access: Available globally via CDN
+- No data export: Exchange rates are public information
 
 ## Industry-Specific Compliance
 
@@ -396,17 +379,17 @@ Although this API serves financial data (not personal data), some considerations
 <AccordionGroup>
   <Accordion title="APRA Requirements" icon="university">
     For APRA-regulated entities:
-    - Maintain **robust rate sources** - RBA rates qualify
-    - Document **operational risk controls** around rate feeds
-    - Implement **business continuity** for critical rate data
-    - Regular **validation** of rate accuracy against source
+    - Maintain robust rate sources - RBA rates qualify
+    - Document operational risk controls around rate feeds
+    - Implement business continuity for critical rate data
+    - Regular validation of rate accuracy against source
   </Accordion>
   
   <Accordion title="Market Risk Management" icon="chart-line">
-    - Use **consistent rate timing** across all systems
-    - Implement **rate validation** checks against RBA source
-    - Monitor for **significant rate movements** 
-    - Maintain **audit trails** for all rate applications
+    - Use consistent rate timing across all systems
+    - Implement rate validation checks against RBA source
+    - Monitor for significant rate movements
+    - Maintain audit trails for all rate applications
   </Accordion>
 </AccordionGroup>
 
@@ -415,18 +398,18 @@ Although this API serves financial data (not personal data), some considerations
 <AccordionGroup>
   <Accordion title="Customs & Border Force" icon="truck">
     For customs valuations:
-    - Use rates **prevailing at time of export** to Australia
-    - Maintain records of **rate source and timing**
-    - Ensure **consistency** with customs declarations
-    - Keep records for **minimum 5 years**
+    - Use rates prevailing at time of export to Australia
+    - Maintain records of rate source and timing
+    - Ensure consistency with customs declarations
+    - Keep records for minimum 5 years
   </Accordion>
   
-  <Accordion title="Transfer Pricing" icon="exchange">
+  <Accordion title="Transfer Pricing" icon="exchange-alt">
     For related party transactions:
-    - Document **arm's length rate selection**
-    - Use **contemporaneous rates** (at transaction time)
-    - Maintain **consistent methodology**
-    - Support with **independent rate source** (RBA qualifies)
+    - Document arm's length rate selection
+    - Use contemporaneous rates (at transaction time)
+    - Maintain consistent methodology
+    - Support with independent rate source (RBA qualifies)
   </Accordion>
 </AccordionGroup>
 
@@ -434,17 +417,17 @@ Although this API serves financial data (not personal data), some considerations
 
 <AccordionGroup>
   <Accordion title="Consumer Law Compliance" icon="shopping-cart">
-    - **Clearly disclose** exchange rate and timing used
-    - **Update rates regularly** (we update daily at 4 PM AEST)
-    - **Display source** ("Rates from Reserve Bank of Australia")
-    - **Maintain consistency** between quote and charge rates
+    - Clearly disclose exchange rate and timing used
+    - Update rates regularly (we update daily at 4 PM AEST)
+    - Display source ("Rates from Reserve Bank of Australia")
+    - Maintain consistency between quote and charge rates
   </Accordion>
   
   <Accordion title="Payment Processing" icon="credit-card">
-    - Use **real-time or recent rates** for conversions
-    - **Disclose rate margins** if marking up RBA rates
-    - **Store rate used** with each transaction
-    - **Provide audit trail** for customer disputes
+    - Use real-time or recent rates for conversions
+    - Disclose rate margins if marking up RBA rates
+    - Store rate used with each transaction
+    - Provide audit trail for customer disputes
   </Accordion>
 </AccordionGroup>
 
@@ -452,35 +435,35 @@ Although this API serves financial data (not personal data), some considerations
 
 ### Basic Compliance
 
-- [ ] **RBA attribution** included in application
-- [ ] **Rate source** documented in procedures
-- [ ] **Request logging** implemented for audit trails
-- [ ] **Error handling** for missing or stale rates
-- [ ] **Data retention** policy documented
+- [ ] RBA attribution included in application
+- [ ] Rate source documented in procedures
+- [ ] Request logging implemented for audit trails
+- [ ] Error handling for missing or stale rates
+- [ ] Data retention policy documented
 
 ### ATO Compliance (Australian Businesses)
 
-- [ ] **Historical rates** used for transaction dates
-- [ ] **Audit records** maintained with timestamps
-- [ ] **Consistent methodology** across reporting periods
-- [ ] **5-year retention** of exchange rate records
-- [ ] **Rate evidence** stored with transaction details
+- [ ] Historical rates used for transaction dates
+- [ ] Audit records maintained with timestamps
+- [ ] Consistent methodology across reporting periods
+- [ ] 5-year retention of exchange rate records
+- [ ] Rate evidence stored with transaction details
 
 ### Financial Reporting
 
-- [ ] **Period-end rates** or averages calculated correctly
-- [ ] **Disclosure policy** documented for financial statements
-- [ ] **Rate timing** documented (transaction vs period-end)
-- [ ] **Methodology consistency** maintained
-- [ ] **AASB compliance** verified with accounting team
+- [ ] Period-end rates or averages calculated correctly
+- [ ] Disclosure policy documented for financial statements
+- [ ] Rate timing documented (transaction vs period-end)
+- [ ] Methodology consistency maintained
+- [ ] AASB compliance verified with accounting team
 
 ### Enterprise/Regulated Entities
 
-- [ ] **Operational risk** controls documented
-- [ ] **Business continuity** plan for rate feed failures
-- [ ] **Rate validation** processes implemented  
-- [ ] **Senior management** approval of rate source
-- [ ] **Regular compliance** reviews scheduled
+- [ ] Operational risk controls documented
+- [ ] Business continuity plan for rate feed failures
+- [ ] Rate validation processes implemented
+- [ ] Senior management approval of rate source
+- [ ] Regular compliance reviews scheduled
 
 ## Support & Resources
 
@@ -495,11 +478,11 @@ Although this API serves financial data (not personal data), some considerations
     Get help implementing compliance features
   </Card>
   
-  <Card title="RBA Source Data" icon="external-link" href="https://www.rba.gov.au/statistics/frequency/exchange-rates.html">
+  <Card title="RBA Source Data" icon="link" href="https://www.rba.gov.au/statistics/frequency/exchange-rates.html">
     View original RBA exchange rate data
   </Card>
   
-  <Card title="ATO Guidance" icon="external-link" href="https://www.ato.gov.au/business/international-tax-for-business/currency-conversion/">
+  <Card title="ATO Guidance" icon="link" href="https://www.ato.gov.au/business/international-tax-for-business/currency-conversion/">
     Official ATO currency conversion guidance
   </Card>
 </CardGroup>
@@ -508,15 +491,15 @@ Although this API serves financial data (not personal data), some considerations
 
 Need help implementing compliance controls? We partner with:
 
-- **Accounting firms** specializing in currency compliance
-- **Risk management** consultants for operational controls  
-- **Legal advisors** for regulatory interpretation
-- **System integrators** for enterprise implementations
+- Accounting firms specializing in currency compliance
+- Risk management consultants for operational controls
+- Legal advisors for regulatory interpretation
+- System integrators for enterprise implementations
 
 Contact [enterprise@exchangeratesapi.com.au](mailto:enterprise@exchangeratesapi.com.au) for referrals.
 
 ---
 
 <Note>
-**Disclaimer**: This guide provides general information only. Exchange Rates API Pty Ltd does not provide legal, accounting, or compliance advice. Consult qualified professionals for your specific requirements.
+Disclaimer: This guide provides general information only. Exchange Rates API Pty Ltd does not provide legal, accounting, or compliance advice. Consult qualified professionals for your specific requirements.
 </Note>
