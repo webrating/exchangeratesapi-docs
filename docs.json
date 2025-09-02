@@ -1,132 +1,124 @@
 {
-  "$schema": "https://mintlify.com/schema.json",
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
   "name": "Exchange Rates API",
-  "theme": "willow",
-  "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
-  },
-  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#4742A9",
     "light": "#5B56BD",
     "dark": "#252258"
   },
-  "topbarLinks": [
-    {
-      "name": "API Dashboard",
-      "url": "https://app.exchangeratesapi.com.au"
-    },
-    {
-      "name": "Status",
-      "url": "https://status.exchangeratesapi.com.au"
-    }
-  ],
-  "topbarCtaButton": {
-    "name": "Get API Key",
-    "url": "https://app.exchangeratesapi.com.au/login"
-  },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    },
-    {
-      "name": "SDKs",
-      "url": "sdks"
-    },
-    {
-      "name": "Guides",
-      "url": "guides"
-    }
-  ],
-  "anchors": [
-    {
-      "name": "Website",
-      "icon": "globe",
-      "url": "https://exchangeratesapi.com.au"
-    },
-    {
-      "name": "Dashboard", 
-      "icon": "chart-line",
-      "url": "https://app.exchangeratesapi.com.au/dashboard"
-    },
-    {
-      "name": "Support",
-      "icon": "envelope",
-      "url": "mailto:support@exchangeratesapi.com.au"
-    },
-    {
-      "name": "Status",
-      "icon": "activity",
-      "url": "https://status.exchangeratesapi.com.au"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Get Started",
-      "pages": [
-        "introduction",
-        "quickstart", 
-        "authentication",
-        "rate-limits"
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication",
+              "rate-limits"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Public Endpoints",
+            "pages": [
+              "api-reference/public/status",
+              "api-reference/public/symbols",
+              "api-reference/public/convert-free"
+            ]
+          },
+          {
+            "group": "Authenticated Endpoints",
+            "pages": [
+              "api-reference/authenticated/latest"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "Client Libraries",
+            "pages": [
+              "sdks/javascript"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Best Practices",
+            "pages": [
+              "guides/best-practices"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "href": "https://app.exchangeratesapi.com.au/dashboard",
+          "icon": "chart-line"
+        },
+        {
+          "anchor": "Status",
+          "href": "https://status.exchangeratesapi.com.au",
+          "icon": "activity"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@exchangeratesapi.com.au",
+          "icon": "envelope"
+        }
       ]
-    },
-    {
-      "group": "Public Endpoints",
-      "pages": [
-        "api-reference/public/status",
-        "api-reference/public/symbols",
-        "api-reference/public/convert-free"
-      ]
-    },
-    {
-      "group": "Authenticated Endpoints", 
-      "pages": [
-        "api-reference/authenticated/latest"
-      ]
-    },
-    {
-      "group": "SDKs & Examples",
-      "pages": [
-        "sdks/javascript"
-      ]
-    },
-    {
-      "group": "Guides",
-      "pages": [
-        "guides/best-practices"
-      ]
-    },
-    {
-      "group": "Resources",
-      "pages": [
-        "changelog",
-        "support"
-      ]
-    }
-  ],
-  "footerSocials": {
-    "website": "https://exchangeratesapi.com.au",
-    "github": "https://github.com/webrating/exchangeratesapi-docs"
-  },
-  "api": {
-    "baseUrl": "https://api.exchangeratesapi.com.au",
-    "auth": {
-      "method": "bearer"
     }
   },
-  "analytics": {
-    "ga4": {
-      "measurementId": "G-XXXXXXXXXX"
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://exchangeratesapi.com.au"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API Key",
+      "href": "https://app.exchangeratesapi.com.au/login"
     }
   },
-  "seo": {
-    "indexHiddenPages": false
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
-  "feedback": {
-    "thumbsRating": true,
-    "suggestEdit": true,
-    "raiseIssue": true
+  "footer": {
+    "socials": {
+      "github": "https://github.com/webrating/exchangeratesapi-docs",
+      "linkedin": "https://linkedin.com/company/exchangeratesapi"
+    }
   }
 }
