@@ -29,7 +29,7 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API Endpoints",
         "openapi": "/openapi.json",
         "groups": [
           {
