@@ -1,5 +1,5 @@
 ---
-title: 'Currency Conversion'
+title: 'Currency Conversion (/convert)'
 openapi: 'GET /convert'
 description: 'Convert currencies using the latest exchange rates with a free tier limit of 3 requests per hour per IP'
 ---
@@ -265,7 +265,7 @@ Free conversions only use the latest available rates. Historical conversion requ
   "error": {
     "code": 400, 
     "type": "bad_request",
-    "info": "Free tier conversions must use AUD as base currency"
+    "info": "Only AUD is supported as base currency"
   }
 }
 ```
@@ -324,7 +324,7 @@ For production use, unlimited conversions, and additional features:
   <Card
     title="View Plans"
     icon="credit-card"
-    href="https://exchangeratesapi.com.au/pricing"
+    href="https://www.exchangeratesapi.com.au/pricing"
   >
     Compare paid plans with higher quotas
   </Card>

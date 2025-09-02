@@ -1,5 +1,5 @@
 ---
-title: 'Currency Conversion for Date'
+title: 'Currency Conversion for Date (/convert)'
 openapi: 'GET /convert'
 description: 'Convert amounts between currencies with unlimited requests and historical date support'
 ---
@@ -232,7 +232,7 @@ curl_close($historical_curl);
   
   <Expandable title="info object">
     <ResponseField name="timestamp" type="integer">
-      Unix timestamp for the rate date (midnight UTC). Only present for historical conversions.
+      Unix timestamp for the rate date (midnight UTC)
     </ResponseField>
     <ResponseField name="rate" type="number">
       Exchange rate used for conversion (AUD per unit of foreign currency) with up to 6 decimal places

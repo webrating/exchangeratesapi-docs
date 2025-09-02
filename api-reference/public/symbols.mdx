@@ -1,5 +1,5 @@
 ---
-title: 'Supported Currencies'
+title: 'Supported Currencies (/symbols)'
 openapi: 'GET /symbols'
 description: 'Get a complete list of all supported currencies with names, symbols, and country information'
 ---
@@ -86,8 +86,7 @@ foreach ($data['symbols'] as $code => $info) {
     "TWI": {
       "name": "Trade-Weighted Index",
       "symbol": "TWI",
-      "country": "Australia",
-      "note": "Not available for conversion operations"
+      "country": "Australia"
     },
     "SDR": {
       "name": "Special Drawing Rights",
@@ -123,9 +122,6 @@ foreach ($data['symbols'] as $code => $info) {
   Country or region where the currency is used
 </ResponseField>
 
-<ResponseField name="symbols.{code}.note" type="string">
-  Additional information about currency limitations (e.g., TWI conversion restrictions)
-</ResponseField>
 
 <ResponseField name="count" type="number" required>
   Total number of supported currencies

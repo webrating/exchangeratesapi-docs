@@ -29,7 +29,7 @@
         ]
       },
       {
-        "tab": "API Endpoints",
+        "tab": "API Reference",
         "openapi": "/openapi.json",
         "groups": [
           {
@@ -80,7 +80,7 @@
       "anchors": [
         {
           "anchor": "Home",
-          "href": "https://exchangeratesapi.com.au",
+          "href": "https://www.exchangeratesapi.com.au",
           "icon": "house"
         },
         {
@@ -105,7 +105,7 @@
     "links": [
       {
         "label": "Website",
-        "href": "https://exchangeratesapi.com.au"
+        "href": "https://www.exchangeratesapi.com.au"
       }
     ],
     "primary": {
@@ -125,11 +125,5 @@
       "cursor",
       "vscode"
     ]
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/webrating/exchangeratesapi-docs",
-      "linkedin": "https://linkedin.com/company/exchangeratesapi"
-    }
   }
 }

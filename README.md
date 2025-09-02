@@ -1,12 +1,12 @@
 # Exchange Rates API Documentation
 
-This repository contains the official documentation for the [Exchange Rates API](https://exchangeratesapi.com.au) - a modern REST API providing official Reserve Bank of Australia (RBA) exchange rate data.
+This repository contains the official documentation for the [Exchange Rates API](https://www.exchangeratesapi.com.au) - a modern REST API providing official Reserve Bank of Australia (RBA) exchange rate data.
 
 ## 📖 Live Documentation
 
 Visit [docs.exchangeratesapi.com.au](https://docs.exchangeratesapi.com.au) to view the complete documentation.
 
-Visit our website at [exchangeratesapi.com.au](https://exchangeratesapi.com.au) for more information.
+Visit our website at [exchangeratesapi.com.au](https://www.exchangeratesapi.com.au) for more information.
 
 ## 🚀 API Overview
 

@@ -1,5 +1,5 @@
 ---
-title: 'Status'
+title: 'Status (/status)'
 openapi: 'GET /status'
 description: 'Check the operational status of the Exchange Rates API and when data was last updated'
 ---
@@ -53,9 +53,7 @@ echo "API Status: " . $data['status'];
   "status": "operational",
   "last_update": "2025-09-01T06:17:41.202Z",
   "stale": false,
-  "region": "SYD",
-  "version": "1.0",
-  "uptime": "99.97%"
+  "region": "SYD"
 }
 ```
 
@@ -85,13 +83,6 @@ echo "API Status: " . $data['status'];
   Cloudflare data center that processed the request (e.g., "SYD", "MEL", "BNE")
 </ResponseField>
 
-<ResponseField name="version" type="string">
-  Current API version number
-</ResponseField>
-
-<ResponseField name="uptime" type="string">
-  Rolling 30-day uptime percentage
-</ResponseField>
 
 ## Status Codes
 

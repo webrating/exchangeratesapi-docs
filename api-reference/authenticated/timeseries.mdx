@@ -1,5 +1,5 @@
 ---
-title: 'Historical Exchange Rates'
+title: 'Historical Exchange Rates (/timeseries)'
 openapi: 'GET /timeseries'
 description: 'Get exchange rates for a date range with optional currency filtering (maximum 365 days)'
 ---
@@ -251,6 +251,17 @@ print_r($data);
     "code": 400,
     "type": "bad_request",
     "info": "Unsupported currency 'XYZ'"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Base Currency
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Only AUD is supported as base currency in MVP"
   }
 }
 ```
