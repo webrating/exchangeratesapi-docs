@@ -59,7 +59,10 @@
           {
             "group": "Client Libraries",
             "pages": [
-              "sdks/javascript"
+              "sdks/javascript",
+              "sdks/python",
+              "sdks/php",
+              "sdks/curl"
             ]
           }
         ]
