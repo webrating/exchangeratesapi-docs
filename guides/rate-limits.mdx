@@ -13,7 +13,7 @@ All rate limits are calculated in **Australian Eastern Time (AEST/AEDT)** and re
 
 ## Plan Comparison
 
-<Card title="Plan Tiers" icon="chart-bar">
+<Card title="Plan Tiers">
 
 | Plan | Price (AUD/month) | Daily Requests | Historical Data | Support |
 |------|-------------------|----------------|-----------------|---------|
@@ -366,27 +366,3 @@ Need more than our Business plan offers? Contact us for:
 - **Custom features**: Webhooks, bulk exports, custom formats
 
 Email [enterprise@exchangeratesapi.com.au](mailto:enterprise@exchangeratesapi.com.au) to discuss your requirements.
-
-## Frequently Asked Questions
-
-<AccordionGroup>
-  <Accordion title="What timezone are quotas calculated in?" icon="globe">
-    All quotas reset at **midnight Australian Eastern Time (AEST/AEDT)**. This aligns with RBA business hours and data update schedules.
-  </Accordion>
-  
-  <Accordion title="Do failed requests count toward my quota?" icon="exclamation-triangle">
-    **No**. Only successful requests (HTTP 200 responses) count toward your daily quota. Authentication errors, rate limit errors, and server errors don't consume your quota.
-  </Accordion>
-  
-  <Accordion title="Can I get a refund if I don't use my full quota?" icon="money-bill">
-    Our plans are subscription-based with monthly quotas. Unused requests don't roll over or qualify for refunds, similar to mobile data plans.
-  </Accordion>
-  
-  <Accordion title="What happens if I exceed my quota?" icon="ban">
-    API requests return a 429 error. Your account remains active, and quota resets at midnight AEST. Consider upgrading to avoid future issues.
-  </Accordion>
-  
-  <Accordion title="Can I upgrade/downgrade anytime?" icon="arrows-up-down">
-    **Yes**. You can change plans anytime in your dashboard. Upgrades take effect immediately; downgrades take effect at your next billing cycle.
-  </Accordion>
-</AccordionGroup>

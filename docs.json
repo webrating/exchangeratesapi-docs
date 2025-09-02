@@ -23,7 +23,7 @@
               "introduction",
               "quickstart",
               "authentication",
-              "rate-limits"
+              "support"
             ]
           }
         ]
@@ -70,7 +70,21 @@
           {
             "group": "Best Practices",
             "pages": [
-              "guides/best-practices"
+              "guides/best-practices",
+              "guides/troubleshooting",
+              "guides/rate-limits"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Legal",
+        "groups": [
+          {
+            "group": "Legal",
+            "pages": [
+              "legal/legal",
+              "legal/compliance"
             ]
           }
         ]
@@ -124,6 +138,27 @@
       "mcp",
       "cursor",
       "vscode"
+    ]
+  },
+  "footer": {
+    "links": [
+      {
+        "header": "Resources",
+        "items": [
+          {
+            "label": "Customers",
+            "href": "https://example.com/customers"
+          },
+          {
+            "label": "Enterprise",
+            "href": "https://example.com/enterprise"
+          },
+          {
+            "label": "Request Preview",
+            "href": "https://example.com/preview"
+          }
+        ]
+      }
     ]
   }
 }
