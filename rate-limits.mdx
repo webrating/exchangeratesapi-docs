@@ -311,13 +311,13 @@ async function robustApiCall(apiClient, endpoint) {
 Instead of multiple single-currency requests, use batch endpoints:
 
 ```javascript
-// ❌ Bad - Multiple requests
+// Bad - Multiple requests
 const usdRate = await api.makeRequest('/latest/USD');    // 1 request
 const eurRate = await api.makeRequest('/latest/EUR');    // 1 request  
 const gbpRate = await api.makeRequest('/latest/GBP');    // 1 request
 // Total: 3 requests
 
-// ✅ Good - Single batch request
+// Good - Single batch request
 const allRates = await api.makeRequest('/latest');       // 1 request
 const usdRate = allRates.rates.USD;
 const eurRate = allRates.rates.EUR;
