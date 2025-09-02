@@ -1,6 +1,6 @@
 ---
-title: Exchange Rates API - Documentation
-description: 'Welcome to the Exchange Rates API - Official Reserve Bank of Australia exchange rate data through modern REST endpoints'
+title: Exchange Rates API
+description: 'Welcome to the Exchange Rates API - Official Reserve Bank of Australia exchange rate data for programmatic access through REST API endpoints'
 ---
 
 <img
@@ -14,34 +14,30 @@ description: 'Welcome to the Exchange Rates API - Official Reserve Bank of Austr
   alt="Background Dark"
 />
 
-The Exchange Rates API is a developer-focused data service providing **official Reserve Bank of Australia (RBA) exchange rate data** through clean, modern REST API endpoints. We transform publicly available and free RBA data (currently only accessible via HTML/RSS) into instant JSON responses.
+The Exchange Rates API is a developer-friendly data service providing **official Reserve Bank of Australia (RBA) exchange rate data** through clean, modern REST API endpoints. We transform publicly available RBA data (currently only accessible via HTML/RSS) into instant JSON responses.
 
 <CardGroup cols={2}>
   <Card
     title="Official RBA Data"
     icon="school"
-    href="/legal/compliance"
   >
     Direct from the Reserve Bank of Australia, updated daily at 4:00 PM AEST
   </Card>
   <Card
     title="Simple REST API"
     icon="code"
-    href="/api-reference"
   >
     Clean JSON responses with comprehensive error handling
   </Card>
   <Card
     title="Historical Data"
-    icon="history"
-    href="/api-reference/authenticated/timeseries"
+    icon="clock-rotate-left"
   >
     Complete history from 2018 onwards with 30,000+ data points
   </Card>
   <Card
     title="Generous Free Tier"
     icon="gift"
-    href="/rate-limits"
   >
     50 requests per day on the free plan, no credit card required
   </Card>
@@ -49,7 +45,7 @@ The Exchange Rates API is a developer-focused data service providing **official 
 
 ## Why Exchange Rates API?
 
-The Reserve Bank of Australia publishes official exchange rates daily, but only provides this data in:
+The Reserve Bank of Australia publishes official exchange rates daily for free, but only provides this data in:
 
 - HTML tables requiring web scraping
 - RSS/XML feeds with complex RDF namespaces  
@@ -64,7 +60,7 @@ Australian businesses need this **official RBA data** for:
 - Accounting software integrations
 
 <Note>
-All data is sourced from the Reserve Bank of Australia. We are not affiliated with or endorsed by the RBA. See our [compliance guide](/legal/compliance) for attribution requirements.
+All data is sourced from the Reserve Bank of Australia. We are not affiliated with or endorsed by the RBA.
 </Note>
 
 ## Supported Currencies
@@ -72,7 +68,7 @@ All data is sourced from the Reserve Bank of Australia. We are not affiliated wi
 We support all currencies published by the RBA:
 
 <AccordionGroup>
-  <Accordion title="Major Currencies" icon="dollar-sign">
+  <Accordion title="Major Currencies" icon="coins">
     - **USD** - US Dollar
     - **EUR** - Euro  
     - **GBP** - British Pound Sterling

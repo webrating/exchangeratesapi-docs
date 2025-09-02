@@ -136,31 +136,6 @@ Track your API usage in the [dashboard](https://app.exchangeratesapi.com.au):
 - **Response Times**: Average API performance
 - **Error Rates**: Success vs error rates
 
-### Usage Patterns
-Optimize your usage by understanding patterns:
-
-<AccordionGroup>
-  <Accordion title="Peak Hours" icon="clock">
-    - **9 AM - 5 PM AEST**: Business hours see highest usage
-    - **4 PM AEST**: RBA data updates, causing traffic spikes
-    - **Midnight AEST**: Quota reset may cause morning surges
-  </Accordion>
-  
-  <Accordion title="Common Endpoints" icon="chart-line">
-    - **GET /latest**: 60% of all requests
-    - **GET /convert**: 25% of all requests  
-    - **GET /timeseries**: 10% of all requests
-    - **Historical endpoints**: 5% of all requests
-  </Accordion>
-  
-  <Accordion title="Response Times" icon="stopwatch">
-    - **Australian CDN**: &lt;50ms average
-    - **Asia-Pacific**: &lt;100ms average
-    - **Global**: &lt;200ms average
-    - **Historical queries**: +20-50ms additional
-  </Accordion>
-</AccordionGroup>
-
 ## Rate Limit Best Practices
 
 ### 1. Implement Client-Side Throttling
@@ -355,14 +330,3 @@ Consider upgrading when you:
     Your existing API keys continue working with higher limits
   </Step>
 </Steps>
-
-## Enterprise Solutions
-
-Need more than our Business plan offers? Contact us for:
-- **Custom quotas**: Millions of requests per day
-- **Dedicated infrastructure**: Private endpoints
-- **Custom SLAs**: 99.99% uptime guarantees
-- **Priority support**: Direct phone/Slack access
-- **Custom features**: Webhooks, bulk exports, custom formats
-
-Email [enterprise@exchangeratesapi.com.au](mailto:enterprise@exchangeratesapi.com.au) to discuss your requirements.

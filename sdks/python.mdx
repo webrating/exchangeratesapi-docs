@@ -1,0 +1,801 @@
+---
+title: 'Python SDK'
+description: 'Official Python SDK for the Exchange Rates API with examples for Django, Flask and vanilla Python'
+---
+
+## Installation
+
+<CodeGroup>
+
+```bash pip
+pip install exchangeratesapi
+```
+
+```bash pipenv
+pipenv install exchangeratesapi
+```
+
+```bash poetry
+poetry add exchangeratesapi
+```
+
+</CodeGroup>
+
+<Note>
+The official Python SDK is coming soon! For now, use the native requests examples below or create your own wrapper class.
+</Note>
+
+## Quick Start
+
+### Basic Python Class
+
+```python
+import requests
+import os
+from typing import Dict, List, Optional
+from datetime import datetime
+
+class ExchangeRatesAPI:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = 'https://api.exchangeratesapi.com.au'
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Python-ExchangeRatesAPI/1.0'
+        })
+
+    def _make_request(self, endpoint: str) -> Dict:
+        response = self.session.get(f'{self.base_url}{endpoint}')
+        
+        if response.status_code != 200:
+            response.raise_for_status()
+        
+        data = response.json()
+        
+        if not data.get('success', False):
+            error_info = data.get('error', {}).get('info', 'Unknown error')
+            raise Exception(f"API Error: {error_info}")
+        
+        return data
+
+    def get_latest_rates(self) -> Dict:
+        """Get the latest exchange rates for all currencies"""
+        return self._make_request('/latest')
+
+    def get_latest_rate(self, currency: str) -> Dict:
+        """Get the latest exchange rate for a specific currency"""
+        return self._make_request(f'/latest/{currency}')
+
+    def convert(self, from_currency: str, to_currency: str, 
+                amount: float, date: Optional[str] = None) -> Dict:
+        """Convert an amount from one currency to another"""
+        params = {
+            'from': from_currency,
+            'to': to_currency,
+            'amount': amount
+        }
+        
+        if date:
+            params['date'] = date
+        
+        query_string = '&'.join([f'{k}={v}' for k, v in params.items()])
+        return self._make_request(f'/convert?{query_string}')
+
+    def get_historical_rates(self, date: str) -> Dict:
+        """Get historical exchange rates for a specific date"""
+        return self._make_request(f'/{date}')
+
+    def get_historical_rate(self, date: str, currency: str) -> Dict:
+        """Get historical exchange rate for a specific date and currency"""
+        return self._make_request(f'/{date}/{currency}')
+
+    def get_time_series(self, start_date: str, end_date: str, 
+                       symbols: Optional[List[str]] = None) -> Dict:
+        """Get time series data for a date range"""
+        params = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        
+        if symbols:
+            params['symbols'] = ','.join(symbols)
+        
+        query_string = '&'.join([f'{k}={v}' for k, v in params.items()])
+        return self._make_request(f'/timeseries?{query_string}')
+
+    def get_status(self) -> Dict:
+        """Get API status (no authentication required)"""
+        response = requests.get(f'{self.base_url}/status')
+        return response.json()
+
+# Usage
+api = ExchangeRatesAPI(os.getenv('EXCHANGE_RATES_API_KEY'))
+
+try:
+    rates = api.get_latest_rates()
+    print(f"USD Rate: {rates['rates']['USD']}")
+    
+    conversion = api.convert('AUD', 'USD', 100)
+    print(f"100 AUD = {conversion['result']} USD")
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+### Using with Type Hints
+
+```python
+from typing import Dict, List, Optional, Union
+from dataclasses import dataclass
+from datetime import datetime
+import requests
+
+@dataclass
+class ExchangeRate:
+    currency: str
+    rate: float
+    date: str
+
+@dataclass
+class ConversionResult:
+    from_currency: str
+    to_currency: str
+    amount: float
+    result: float
+    rate: float
+    date: str
+
+class ExchangeRatesClient:
+    def __init__(self, api_key: str, timeout: int = 30):
+        self.api_key = api_key
+        self.base_url = 'https://api.exchangeratesapi.com.au'
+        self.timeout = timeout
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        })
+
+    def _make_request(self, endpoint: str) -> Dict:
+        try:
+            response = self.session.get(
+                f'{self.base_url}{endpoint}', 
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            if not data.get('success'):
+                raise ValueError(f"API Error: {data.get('error', {}).get('info', 'Unknown')}")
+            
+            return data
+        except requests.RequestException as e:
+            raise ConnectionError(f"Network error: {e}")
+
+    def get_latest_rates(self) -> Dict[str, ExchangeRate]:
+        """Get latest rates as ExchangeRate objects"""
+        data = self._make_request('/latest')
+        
+        return {
+            currency: ExchangeRate(
+                currency=currency,
+                rate=rate,
+                date=data['date']
+            )
+            for currency, rate in data['rates'].items()
+        }
+
+    def convert_currency(self, from_currency: str, to_currency: str, 
+                        amount: float, date: Optional[str] = None) -> ConversionResult:
+        """Convert currency and return structured result"""
+        params = {
+            'from': from_currency,
+            'to': to_currency,
+            'amount': amount
+        }
+        
+        if date:
+            params['date'] = date
+        
+        query = '&'.join([f'{k}={v}' for k, v in params.items()])
+        data = self._make_request(f'/convert?{query}')
+        
+        return ConversionResult(
+            from_currency=data['query']['from'],
+            to_currency=data['query']['to'],
+            amount=data['query']['amount'],
+            result=data['result'],
+            rate=data['info']['rate'],
+            date=data['date']
+        )
+
+    def get_rate(self, currency: str, date: Optional[str] = None) -> Optional[float]:
+        """Get a single rate, optionally for a specific date"""
+        try:
+            if date:
+                data = self._make_request(f'/{date}/{currency}')
+            else:
+                data = self._make_request(f'/latest/{currency}')
+            
+            return data['rates'][currency]
+        except Exception:
+            return None
+
+# Usage with type hints
+client = ExchangeRatesClient(os.getenv('EXCHANGE_RATES_API_KEY'))
+
+rates: Dict[str, ExchangeRate] = client.get_latest_rates()
+usd_rate: ExchangeRate = rates['USD']
+print(f"USD: {usd_rate.rate} on {usd_rate.date}")
+
+conversion: ConversionResult = client.convert_currency('AUD', 'USD', 100)
+print(f"{conversion.amount} {conversion.from_currency} = {conversion.result} {conversion.to_currency}")
+```
+
+## Django Integration
+
+### Settings Configuration
+
+```python
+# settings.py
+
+EXCHANGE_RATES_API = {
+    'API_KEY': os.getenv('EXCHANGE_RATES_API_KEY'),
+    'BASE_URL': 'https://api.exchangeratesapi.com.au',
+    'TIMEOUT': 30,
+    'CACHE_TIMEOUT': 30 * 60,  # 30 minutes
+}
+```
+
+### Service Class
+
+```python
+# services/exchange_rates.py
+
+from django.conf import settings
+from django.core.cache import cache
+from django.utils import timezone
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
+
+class ExchangeRatesService:
+    def __init__(self):
+        self.api_key = settings.EXCHANGE_RATES_API['API_KEY']
+        self.base_url = settings.EXCHANGE_RATES_API['BASE_URL']
+        self.timeout = settings.EXCHANGE_RATES_API['TIMEOUT']
+        self.cache_timeout = settings.EXCHANGE_RATES_API['CACHE_TIMEOUT']
+
+    def _make_request(self, endpoint: str) -> dict:
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.get(
+                f'{self.base_url}{endpoint}',
+                headers=headers,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            if not data.get('success'):
+                raise ValueError(f"API Error: {data.get('error', {}).get('info')}")
+            
+            return data
+        except requests.RequestException as e:
+            logger.error(f"Exchange rates API request failed: {e}")
+            raise
+
+    def get_latest_rates(self, use_cache: bool = True) -> dict:
+        cache_key = 'exchange_rates_latest'
+        
+        if use_cache:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                return cached_data
+        
+        try:
+            data = self._make_request('/latest')
+            
+            if use_cache:
+                cache.set(cache_key, data, self.cache_timeout)
+            
+            return data
+        except Exception as e:
+            logger.error(f"Failed to get latest rates: {e}")
+            
+            # Try to return cached data as fallback
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                logger.info("Returning cached rates due to API failure")
+                return cached_data
+            
+            raise
+
+    def convert_currency(self, from_currency: str, to_currency: str, amount: float) -> dict:
+        params = {
+            'from': from_currency,
+            'to': to_currency,
+            'amount': amount
+        }
+        
+        query = '&'.join([f'{k}={v}' for k, v in params.items()])
+        return self._make_request(f'/convert?{query}')
+
+    def get_rate(self, currency: str, use_cache: bool = True) -> float:
+        try:
+            rates_data = self.get_latest_rates(use_cache)
+            return rates_data['rates'].get(currency)
+        except Exception as e:
+            logger.error(f"Failed to get rate for {currency}: {e}")
+            return None
+```
+
+### Views
+
+```python
+# views.py
+
+from django.http import JsonResponse
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .services.exchange_rates import ExchangeRatesService
+
+class ExchangeRatesView(View):
+    def __init__(self):
+        super().__init__()
+        self.exchange_service = ExchangeRatesService()
+
+    def get(self, request):
+        try:
+            rates = self.exchange_service.get_latest_rates()
+            return JsonResponse({
+                'success': True,
+                'data': rates
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConvertCurrencyView(View):
+    def __init__(self):
+        super().__init__()
+        self.exchange_service = ExchangeRatesService()
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            
+            from_currency = data.get('from')
+            to_currency = data.get('to')
+            amount = data.get('amount')
+            
+            if not all([from_currency, to_currency, amount]):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Missing required parameters: from, to, amount'
+                }, status=400)
+            
+            result = self.exchange_service.convert_currency(
+                from_currency, to_currency, float(amount)
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'data': result
+            })
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': 'Internal server error'
+            }, status=500)
+```
+
+### Models
+
+```python
+# models.py
+
+from django.db import models
+from django.utils import timezone
+
+class ExchangeRateLog(models.Model):
+    currency = models.CharField(max_length=3)
+    rate = models.DecimalField(max_digits=12, decimal_places=6)
+    date = models.DateField()
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ['currency', 'date']
+        ordering = ['-date', 'currency']
+    
+    def __str__(self):
+        return f"{self.currency}: {self.rate} ({self.date})"
+
+class CurrencyConversion(models.Model):
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    result = models.DecimalField(max_digits=15, decimal_places=2)
+    rate = models.DecimalField(max_digits=12, decimal_places=6)
+    conversion_date = models.DateField()
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.amount} {self.from_currency} � {self.result} {self.to_currency}"
+```
+
+### Management Command
+
+```python
+# management/commands/update_exchange_rates.py
+
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+from myapp.services.exchange_rates import ExchangeRatesService
+from myapp.models import ExchangeRateLog
+
+class Command(BaseCommand):
+    help = 'Update exchange rates from the API'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--currency',
+            type=str,
+            help='Update specific currency only'
+        )
+
+    def handle(self, *args, **options):
+        service = ExchangeRatesService()
+        
+        try:
+            self.stdout.write('Fetching latest exchange rates...')
+            rates_data = service.get_latest_rates(use_cache=False)
+            
+            today = timezone.now().date()
+            updated_count = 0
+            
+            currencies_to_update = [options['currency']] if options['currency'] else rates_data['rates'].keys()
+            
+            for currency in currencies_to_update:
+                if currency in rates_data['rates']:
+                    rate = rates_data['rates'][currency]
+                    
+                    log, created = ExchangeRateLog.objects.update_or_create(
+                        currency=currency,
+                        date=today,
+                        defaults={'rate': rate}
+                    )
+                    
+                    if created:
+                        updated_count += 1
+                        self.stdout.write(f"Added {currency}: {rate}")
+                    else:
+                        self.stdout.write(f"Updated {currency}: {rate}")
+            
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f'Successfully updated {updated_count} exchange rates for {rates_data["date"]}'
+                )
+            )
+            
+        except Exception as e:
+            self.stdout.write(
+                self.style.ERROR(f'Failed to update exchange rates: {e}')
+            )
+```
+
+## Flask Integration
+
+### Application Setup
+
+```python
+# app.py
+
+from flask import Flask, jsonify, request
+import os
+import requests
+from functools import wraps
+import logging
+
+app = Flask(__name__)
+
+# Configuration
+app.config['EXCHANGE_RATES_API_KEY'] = os.getenv('EXCHANGE_RATES_API_KEY')
+app.config['EXCHANGE_RATES_BASE_URL'] = 'https://api.exchangeratesapi.com.au'
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class ExchangeRatesAPI:
+    def __init__(self, api_key: str, base_url: str):
+        self.api_key = api_key
+        self.base_url = base_url
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        })
+
+    def get_latest_rates(self):
+        response = self.session.get(f'{self.base_url}/latest')
+        response.raise_for_status()
+        return response.json()
+
+    def convert_currency(self, from_currency: str, to_currency: str, amount: float):
+        params = {
+            'from': from_currency,
+            'to': to_currency,
+            'amount': amount
+        }
+        
+        response = self.session.get(f'{self.base_url}/convert', params=params)
+        response.raise_for_status()
+        return response.json()
+
+# Initialize API client
+exchange_api = ExchangeRatesAPI(
+    app.config['EXCHANGE_RATES_API_KEY'],
+    app.config['EXCHANGE_RATES_BASE_URL']
+)
+
+def handle_api_errors(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except requests.RequestException as e:
+            logger.error(f"API request failed: {e}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch exchange rate data'
+            }), 500
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return jsonify({
+                'success': False,
+                'error': 'Internal server error'
+            }), 500
+    
+    return decorated_function
+
+@app.route('/api/rates')
+@handle_api_errors
+def get_rates():
+    rates = exchange_api.get_latest_rates()
+    return jsonify({
+        'success': True,
+        'data': rates
+    })
+
+@app.route('/api/convert', methods=['POST'])
+@handle_api_errors
+def convert_currency():
+    data = request.get_json()
+    
+    required_fields = ['from', 'to', 'amount']
+    if not all(field in data for field in required_fields):
+        return jsonify({
+            'success': False,
+            'error': 'Missing required fields: from, to, amount'
+        }), 400
+    
+    try:
+        amount = float(data['amount'])
+    except (ValueError, TypeError):
+        return jsonify({
+            'success': False,
+            'error': 'Amount must be a valid number'
+        }), 400
+    
+    result = exchange_api.convert_currency(
+        data['from'], data['to'], amount
+    )
+    
+    return jsonify({
+        'success': True,
+        'data': result
+    })
+
+@app.route('/health')
+def health_check():
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': int(timezone.now().timestamp())
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+## Error Handling & Retry Logic
+
+```python
+import time
+import logging
+from typing import Dict, Optional
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+class ExchangeRatesAPIWithRetry:
+    def __init__(self, api_key: str, max_retries: int = 3, backoff_factor: float = 1.0):
+        self.api_key = api_key
+        self.base_url = 'https://api.exchangeratesapi.com.au'
+        self.max_retries = max_retries
+        
+        # Setup session with retry strategy
+        self.session = requests.Session()
+        
+        retry_strategy = Retry(
+            total=max_retries,
+            status_forcelist=[429, 500, 502, 503, 504],
+            method_whitelist=["HEAD", "GET", "OPTIONS"],
+            backoff_factor=backoff_factor
+        )
+        
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
+        self.session.headers.update({
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        })
+
+    def _make_request_with_fallback(self, endpoint: str) -> Dict:
+        try:
+            response = self.session.get(f'{self.base_url}{endpoint}', timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            
+            if not data.get('success'):
+                raise ValueError(f"API Error: {data.get('error', {}).get('info')}")
+            
+            # Cache successful responses
+            self._cache_response(endpoint, data)
+            
+            return data
+        except Exception as e:
+            logging.error(f"Request to {endpoint} failed: {e}")
+            
+            # Try to return cached data
+            cached = self._get_cached_response(endpoint)
+            if cached:
+                logging.info(f"Returning cached data for {endpoint}")
+                cached['fromCache'] = True
+                return cached
+            
+            raise
+
+    def _cache_response(self, endpoint: str, data: Dict) -> None:
+        """Simple file-based caching"""
+        import json
+        import os
+        from pathlib import Path
+        
+        cache_dir = Path.home() / '.exchange_rates_cache'
+        cache_dir.mkdir(exist_ok=True)
+        
+        cache_file = cache_dir / f"{endpoint.replace('/', '_')}.json"
+        
+        cache_data = {
+            'data': data,
+            'timestamp': time.time()
+        }
+        
+        try:
+            with open(cache_file, 'w') as f:
+                json.dump(cache_data, f)
+        except Exception as e:
+            logging.warning(f"Failed to cache response: {e}")
+
+    def _get_cached_response(self, endpoint: str) -> Optional[Dict]:
+        """Retrieve cached response if still valid"""
+        import json
+        from pathlib import Path
+        
+        cache_dir = Path.home() / '.exchange_rates_cache'
+        cache_file = cache_dir / f"{endpoint.replace('/', '_')}.json"
+        
+        if not cache_file.exists():
+            return None
+        
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+            
+            # Check if cache is less than 1 hour old
+            if time.time() - cache_data['timestamp'] < 3600:
+                return cache_data['data']
+        except Exception as e:
+            logging.warning(f"Failed to read cache: {e}")
+        
+        return None
+
+    def get_latest_rates_safe(self) -> Dict:
+        """Get latest rates with fallback to cached data"""
+        return self._make_request_with_fallback('/latest')
+
+    def convert_safe(self, from_currency: str, to_currency: str, amount: float) -> Dict:
+        """Convert currency with fallback support"""
+        params = {
+            'from': from_currency,
+            'to': to_currency,
+            'amount': amount
+        }
+        
+        query = '&'.join([f'{k}={v}' for k, v in params.items()])
+        endpoint = f'/convert?{query}'
+        
+        return self._make_request_with_fallback(endpoint)
+
+# Usage
+api = ExchangeRatesAPIWithRetry(
+    api_key=os.getenv('EXCHANGE_RATES_API_KEY'),
+    max_retries=3,
+    backoff_factor=2.0
+)
+
+try:
+    rates = api.get_latest_rates_safe()
+    print("Latest rates fetched successfully")
+    
+    if rates.get('fromCache'):
+        print("Note: Data served from cache due to API issues")
+        
+except Exception as e:
+    print(f"Failed to get rates even with retries: {e}")
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="PHP SDK"
+    icon="php"
+    href="/sdks/php"
+  >
+    PHP examples and Laravel integration
+  </Card>
+  <Card
+    title="cURL Examples"
+    icon="terminal"
+    href="/sdks/curl"
+  >
+    Command-line examples and shell scripts
+  </Card>
+  <Card
+    title="JavaScript SDK"
+    icon="js"
+    href="/sdks/javascript"
+  >
+    JavaScript/Node.js examples and React hooks
+  </Card>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api-reference"
+  >
+    Complete API documentation
+  </Card>
+</CardGroup>

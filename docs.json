@@ -129,11 +129,11 @@
         "header": "Legal",
         "items": [
           {
-            "label": "Customers",
+            "label": "Legal",
             "href": "https://docs.exchangeratesapi.com.au/legal/legal"
           },
           {
-            "label": "Enterprise",
+            "label": "Compliance",
             "href": "https://docs.exchangeratesapi.com.au/legal/compliance"
           }
         ]

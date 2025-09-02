@@ -1,0 +1,618 @@
+---
+title: 'PHP SDK'
+description: 'Official PHP SDK for the Exchange Rates API with examples for Laravel, Symfony and vanilla PHP'
+---
+
+## Installation
+
+<CodeGroup>
+
+```bash composer
+composer require exchangeratesapi/php
+```
+
+```bash Manual Download
+# Download and include manually
+wget https://github.com/exchangeratesapi/php/releases/latest/download/exchange-rates-api.phar
+```
+
+</CodeGroup>
+
+<Note>
+The official PHP SDK is coming soon! For now, use the native cURL/Guzzle examples below or create your own wrapper class.
+</Note>
+
+## Quick Start
+
+### Basic PHP Class
+
+```php
+<?php
+
+class ExchangeRatesAPI
+{
+    private $apiKey;
+    private $baseURL = 'https://api.exchangeratesapi.com.au';
+
+    public function __construct(string $apiKey)
+    {
+        $this->apiKey = $apiKey;
+    }
+
+    private function makeRequest(string $endpoint): array
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $this->baseURL . $endpoint,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $this->apiKey,
+                'Content-Type: application/json',
+                'User-Agent: PHP-ExchangeRatesAPI/1.0'
+            ],
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => true
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        if (curl_error($ch)) {
+            throw new Exception('cURL Error: ' . curl_error($ch));
+        }
+        
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+        
+        if ($httpCode >= 400 || !$data['success']) {
+            throw new Exception('API Error: ' . ($data['error']['info'] ?? 'Unknown error'));
+        }
+
+        return $data;
+    }
+
+    public function getLatestRates(): array
+    {
+        return $this->makeRequest('/latest');
+    }
+
+    public function getLatestRate(string $currency): array
+    {
+        return $this->makeRequest('/latest/' . $currency);
+    }
+
+    public function convert(string $from, string $to, float $amount, ?string $date = null): array
+    {
+        $params = http_build_query([
+            'from' => $from,
+            'to' => $to,
+            'amount' => $amount,
+            'date' => $date
+        ]);
+
+        return $this->makeRequest('/convert?' . $params);
+    }
+
+    public function getHistoricalRates(string $date): array
+    {
+        return $this->makeRequest('/' . $date);
+    }
+
+    public function getHistoricalRate(string $date, string $currency): array
+    {
+        return $this->makeRequest('/' . $date . '/' . $currency);
+    }
+
+    public function getTimeSeries(string $startDate, string $endDate, ?array $symbols = null): array
+    {
+        $params = [
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ];
+
+        if ($symbols) {
+            $params['symbols'] = implode(',', $symbols);
+        }
+
+        return $this->makeRequest('/timeseries?' . http_build_query($params));
+    }
+
+    public function getStatus(): array
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $this->baseURL . '/status',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10
+        ]);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+}
+
+// Usage
+$api = new ExchangeRatesAPI($_ENV['EXCHANGE_RATES_API_KEY']);
+
+try {
+    $rates = $api->getLatestRates();
+    echo "USD Rate: " . $rates['rates']['USD'] . "\n";
+    
+    $conversion = $api->convert('AUD', 'USD', 100);
+    echo "100 AUD = " . $conversion['result'] . " USD\n";
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+```
+
+### Using Guzzle HTTP
+
+```php
+<?php
+
+require_once 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+
+class ExchangeRatesAPIClient
+{
+    private $client;
+    private $apiKey;
+    private $baseURL = 'https://api.exchangeratesapi.com.au';
+
+    public function __construct(string $apiKey)
+    {
+        $this->apiKey = $apiKey;
+        $this->client = new Client([
+            'base_uri' => $this->baseURL,
+            'timeout' => 30,
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'PHP-Guzzle-ExchangeRatesAPI/1.0'
+            ]
+        ]);
+    }
+
+    private function makeRequest(string $endpoint): array
+    {
+        try {
+            $response = $this->client->get($endpoint);
+            $data = json_decode($response->getBody()->getContents(), true);
+            
+            if (!$data['success']) {
+                throw new Exception('API Error: ' . $data['error']['info']);
+            }
+            
+            return $data;
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                $response = json_decode($e->getResponse()->getBody()->getContents(), true);
+                throw new Exception('API Error: ' . ($response['error']['info'] ?? $e->getMessage()));
+            }
+            throw new Exception('Network Error: ' . $e->getMessage());
+        }
+    }
+
+    public function getLatestRates(): array
+    {
+        return $this->makeRequest('/latest');
+    }
+
+    public function convert(string $from, string $to, float $amount, ?string $date = null): array
+    {
+        $query = http_build_query(array_filter([
+            'from' => $from,
+            'to' => $to,
+            'amount' => $amount,
+            'date' => $date
+        ]));
+
+        return $this->makeRequest('/convert?' . $query);
+    }
+
+    public function getTimeSeries(string $startDate, string $endDate, ?array $symbols = null): array
+    {
+        $query = http_build_query(array_filter([
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'symbols' => $symbols ? implode(',', $symbols) : null
+        ]));
+
+        return $this->makeRequest('/timeseries?' . $query);
+    }
+}
+
+// Usage
+$api = new ExchangeRatesAPIClient($_ENV['EXCHANGE_RATES_API_KEY']);
+
+try {
+    $rates = $api->getLatestRates();
+    print_r($rates);
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+```
+
+## Laravel Integration
+
+### Service Provider
+
+```php
+<?php
+// app/Providers/ExchangeRatesServiceProvider.php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use App\Services\ExchangeRatesService;
+
+class ExchangeRatesServiceProvider extends ServiceProvider
+{
+    public function register()
+    {
+        $this->app->singleton(ExchangeRatesService::class, function ($app) {
+            return new ExchangeRatesService(config('services.exchange_rates.api_key'));
+        });
+    }
+
+    public function boot()
+    {
+        //
+    }
+}
+```
+
+### Configuration
+
+```php
+<?php
+// config/services.php
+
+return [
+    // ... other services
+
+    'exchange_rates' => [
+        'api_key' => env('EXCHANGE_RATES_API_KEY'),
+        'base_url' => env('EXCHANGE_RATES_BASE_URL', 'https://api.exchangeratesapi.com.au'),
+        'timeout' => env('EXCHANGE_RATES_TIMEOUT', 30),
+    ],
+];
+```
+
+### Service Class
+
+```php
+<?php
+// app/Services/ExchangeRatesService.php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+class ExchangeRatesService
+{
+    private $apiKey;
+    private $baseURL;
+    private $timeout;
+
+    public function __construct(string $apiKey)
+    {
+        $this->apiKey = $apiKey;
+        $this->baseURL = config('services.exchange_rates.base_url');
+        $this->timeout = config('services.exchange_rates.timeout');
+    }
+
+    public function getLatestRates(bool $useCache = true): array
+    {
+        $cacheKey = 'exchange_rates_latest';
+        
+        if ($useCache && Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        try {
+            $response = Http::timeout($this->timeout)
+                ->withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
+                ->get($this->baseURL . '/latest');
+
+            $data = $response->json();
+
+            if (!$data['success']) {
+                throw new \Exception('API Error: ' . $data['error']['info']);
+            }
+
+            // Cache for 30 minutes (RBA updates daily at 4 PM AEST)
+            Cache::put($cacheKey, $data, now()->addMinutes(30));
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Exchange Rates API Error: ' . $e->getMessage());
+            
+            // Return cached data if available
+            if (Cache::has($cacheKey)) {
+                Log::info('Returning cached exchange rates due to API failure');
+                return Cache::get($cacheKey);
+            }
+            
+            throw $e;
+        }
+    }
+
+    public function convert(string $from, string $to, float $amount, ?string $date = null): array
+    {
+        $params = [
+            'from' => $from,
+            'to' => $to,
+            'amount' => $amount
+        ];
+
+        if ($date) {
+            $params['date'] = $date;
+        }
+
+        $response = Http::timeout($this->timeout)
+            ->withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
+            ->get($this->baseURL . '/convert', $params);
+
+        $data = $response->json();
+
+        if (!$data['success']) {
+            throw new \Exception('API Error: ' . $data['error']['info']);
+        }
+
+        return $data;
+    }
+
+    public function getRate(string $currency, bool $useCache = true): ?float
+    {
+        try {
+            $rates = $this->getLatestRates($useCache);
+            return $rates['rates'][$currency] ?? null;
+        } catch (\Exception $e) {
+            Log::error('Failed to get rate for ' . $currency . ': ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function convertAmount(float $amount, string $from, string $to): ?float
+    {
+        try {
+            $conversion = $this->convert($from, $to, $amount);
+            return $conversion['result'];
+        } catch (\Exception $e) {
+            Log::error('Failed to convert ' . $amount . ' ' . $from . ' to ' . $to . ': ' . $e->getMessage());
+            return null;
+        }
+    }
+}
+```
+
+### Controller Usage
+
+```php
+<?php
+// app/Http/Controllers/ExchangeRateController.php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Services\ExchangeRatesService;
+
+class ExchangeRateController extends Controller
+{
+    private $exchangeRatesService;
+
+    public function __construct(ExchangeRatesService $exchangeRatesService)
+    {
+        $this->exchangeRatesService = $exchangeRatesService;
+    }
+
+    public function index()
+    {
+        try {
+            $rates = $this->exchangeRatesService->getLatestRates();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $rates
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function convert(Request $request)
+    {
+        $request->validate([
+            'from' => 'required|string|size:3',
+            'to' => 'required|string|size:3',
+            'amount' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $result = $this->exchangeRatesService->convert(
+                $request->input('from'),
+                $request->input('to'),
+                $request->input('amount')
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+}
+```
+
+### Error Handling & Logging
+
+```php
+<?php
+
+class ExchangeRatesAPIWithRetry
+{
+    private $apiKey;
+    private $baseURL;
+    private $maxRetries;
+    private $retryDelay;
+
+    public function __construct(string $apiKey, int $maxRetries = 3, int $retryDelay = 1)
+    {
+        $this->apiKey = $apiKey;
+        $this->baseURL = 'https://api.exchangeratesapi.com.au';
+        $this->maxRetries = $maxRetries;
+        $this->retryDelay = $retryDelay;
+    }
+
+    private function makeRequestWithRetry(string $endpoint, int $attempt = 1): array
+    {
+        try {
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $this->baseURL . $endpoint,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $this->apiKey,
+                    'Content-Type: application/json'
+                ],
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                throw new Exception('cURL Error: ' . $error);
+            }
+
+            $data = json_decode($response, true);
+
+            if ($httpCode >= 400 || !$data['success']) {
+                $errorInfo = $data['error']['info'] ?? 'Unknown error';
+                $errorCode = $data['error']['code'] ?? $httpCode;
+                
+                // Don't retry client errors (4xx)
+                if ($httpCode >= 400 && $httpCode < 500) {
+                    throw new Exception("API Error $errorCode: $errorInfo");
+                }
+                
+                throw new Exception("Server Error $errorCode: $errorInfo");
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            error_log("Attempt $attempt failed: " . $e->getMessage());
+
+            // Don't retry authentication or client errors
+            if (strpos($e->getMessage(), 'API Error 4') === 0) {
+                throw $e;
+            }
+
+            // Retry on network errors and server errors
+            if ($attempt < $this->maxRetries) {
+                sleep($this->retryDelay * $attempt);
+                return $this->makeRequestWithRetry($endpoint, $attempt + 1);
+            }
+
+            throw $e;
+        }
+    }
+
+    public function getLatestRatesSafe(): array
+    {
+        try {
+            return $this->makeRequestWithRetry('/latest');
+        } catch (Exception $e) {
+            error_log('Failed to fetch latest rates after retries: ' . $e->getMessage());
+            
+            // Try to return cached data
+            $cached = $this->getCachedRates();
+            if ($cached) {
+                error_log('Using cached rates due to API failure');
+                return array_merge($cached, ['fromCache' => true]);
+            }
+            
+            throw new Exception('Unable to fetch exchange rates. Please try again later.');
+        }
+    }
+
+    private function getCachedRates(): ?array
+    {
+        $cacheFile = sys_get_temp_dir() . '/exchange_rates_cache.json';
+        
+        if (file_exists($cacheFile)) {
+            $cached = json_decode(file_get_contents($cacheFile), true);
+            
+            // Check if cache is less than 1 hour old
+            if (time() - $cached['cachedAt'] < 3600) {
+                return $cached['rates'];
+            }
+        }
+        
+        return null;
+    }
+
+    private function setCachedRates(array $rates): void
+    {
+        $cacheFile = sys_get_temp_dir() . '/exchange_rates_cache.json';
+        $cacheData = [
+            'rates' => $rates,
+            'cachedAt' => time()
+        ];
+        
+        file_put_contents($cacheFile, json_encode($cacheData));
+    }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Python SDK"
+    icon="python"
+    href="/sdks/python"
+  >
+    Python examples and best practices
+  </Card>
+  <Card
+    title="cURL Examples"
+    icon="terminal"
+    href="/sdks/curl"
+  >
+    Command-line examples and shell scripts
+  </Card>
+  <Card
+    title="JavaScript SDK"
+    icon="js"
+    href="/sdks/javascript"
+  >
+    JavaScript/Node.js examples and React hooks
+  </Card>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api-reference"
+  >
+    Complete API documentation
+  </Card>
+</CardGroup>

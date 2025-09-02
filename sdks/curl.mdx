@@ -1,0 +1,401 @@
+---
+title: 'cURL Examples'
+description: 'Command-line examples and shell scripts for the Exchange Rates API using cURL'
+---
+
+## Quick Examples
+
+<CodeGroup>
+
+```bash Basic Request
+curl -H "Authorization: Bearer your_api_key_here" \
+     https://api.exchangeratesapi.com.au/latest
+```
+
+```bash With Headers
+curl -v -H "Authorization: Bearer your_api_key_here" \
+     -H "User-Agent: MyApp/1.0" \
+     https://api.exchangeratesapi.com.au/latest
+```
+
+```bash Status Check
+curl https://api.exchangeratesapi.com.au/status
+```
+
+</CodeGroup>
+
+<Note>
+The official cURL SDK/wrapper is coming soon! For now, use the native cURL examples below or create your own shell scripts.
+</Note>
+
+## Authentication
+
+### Bearer Token
+
+```bash
+# Set your API key as an environment variable
+export EXCHANGE_RATES_API_KEY="buderim_your_api_key_here"
+
+# Use in requests
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     https://api.exchangeratesapi.com.au/latest
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "timestamp": 1725148800,
+  "base": "AUD",
+  "date": "2025-09-01",
+  "rates": {
+    "USD": 0.643512,
+    "EUR": 0.582341,
+    "GBP": 0.492847
+  }
+}
+```
+
+## Endpoints
+
+### Latest Rates
+
+```bash
+# All currencies
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     https://api.exchangeratesapi.com.au/latest
+
+# Specific currency
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     https://api.exchangeratesapi.com.au/latest/USD
+```
+
+### Currency Conversion
+
+```bash
+# Convert AUD to USD
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100"
+
+# Historical conversion
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100&date=2024-01-01"
+```
+
+### Historical Rates
+
+```bash
+# All currencies for specific date
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     https://api.exchangeratesapi.com.au/2024-01-01
+
+# Specific currency for specific date
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     https://api.exchangeratesapi.com.au/2024-01-01/USD
+```
+
+### Time Series Data
+
+```bash
+# All currencies over date range
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     "https://api.exchangeratesapi.com.au/timeseries?start_date=2024-01-01&end_date=2024-01-31"
+
+# Specific currencies
+curl -H "Authorization: Bearer $EXCHANGE_RATES_API_KEY" \
+     "https://api.exchangeratesapi.com.au/timeseries?start_date=2024-01-01&end_date=2024-01-31&symbols=USD,EUR,GBP"
+```
+
+## Shell Scripts
+
+### Rate Checker Script
+
+```bash
+#!/bin/bash
+# rate-checker.sh - Check current exchange rates
+
+set -e
+
+API_KEY="${EXCHANGE_RATES_API_KEY:-}"
+BASE_URL="https://api.exchangeratesapi.com.au"
+
+if [ -z "$API_KEY" ]; then
+    echo "Error: EXCHANGE_RATES_API_KEY environment variable not set"
+    exit 1
+fi
+
+# Function to make API requests
+make_request() {
+    local endpoint="$1"
+    curl -s -H "Authorization: Bearer $API_KEY" \
+         -H "User-Agent: RateChecker/1.0" \
+         "$BASE_URL$endpoint"
+}
+
+# Check API status
+echo "Checking API status..."
+status_response=$(make_request "/status")
+echo "$status_response" | jq -r '.status // "unknown"'
+
+# Get latest rates
+echo -e "\nFetching latest rates..."
+rates_response=$(make_request "/latest")
+
+if echo "$rates_response" | jq -e '.success' > /dev/null; then
+    echo "Base currency: $(echo "$rates_response" | jq -r '.base')"
+    echo "Date: $(echo "$rates_response" | jq -r '.date')"
+    echo -e "\nMajor currencies:"
+    
+    for currency in USD EUR GBP JPY; do
+        rate=$(echo "$rates_response" | jq -r ".rates.$currency")
+        printf "  %-3s: %s\n" "$currency" "$rate"
+    done
+else
+    echo "Error: $(echo "$rates_response" | jq -r '.error.info')"
+    exit 1
+fi
+```
+
+### Currency Converter Script
+
+```bash
+#!/bin/bash
+# converter.sh - Convert between currencies
+
+set -e
+
+API_KEY="${EXCHANGE_RATES_API_KEY:-}"
+BASE_URL="https://api.exchangeratesapi.com.au"
+
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <from_currency> <to_currency> <amount>"
+    echo "Example: $0 AUD USD 100"
+    exit 1
+fi
+
+FROM_CURRENCY="$1"
+TO_CURRENCY="$2"
+AMOUNT="$3"
+
+if [ -z "$API_KEY" ]; then
+    echo "Error: EXCHANGE_RATES_API_KEY environment variable not set"
+    exit 1
+fi
+
+# Validate amount is numeric
+if ! [[ "$AMOUNT" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "Error: Amount must be a number"
+    exit 1
+fi
+
+# Make conversion request
+response=$(curl -s -H "Authorization: Bearer $API_KEY" \
+               -H "User-Agent: CurrencyConverter/1.0" \
+               "$BASE_URL/convert?from=$FROM_CURRENCY&to=$TO_CURRENCY&amount=$AMOUNT")
+
+if echo "$response" | jq -e '.success' > /dev/null; then
+    result=$(echo "$response" | jq -r '.result')
+    rate=$(echo "$response" | jq -r '.info.rate')
+    date=$(echo "$response" | jq -r '.date')
+    
+    echo "Conversion Result:"
+    echo "  $AMOUNT $FROM_CURRENCY = $result $TO_CURRENCY"
+    echo "  Exchange Rate: $rate (as of $date)"
+else
+    error_info=$(echo "$response" | jq -r '.error.info')
+    echo "Error: $error_info"
+    exit 1
+fi
+```
+
+### Daily Rate Logger
+
+```bash
+#!/bin/bash
+# daily-logger.sh - Log daily exchange rates to CSV
+
+set -e
+
+API_KEY="${EXCHANGE_RATES_API_KEY:-}"
+BASE_URL="https://api.exchangeratesapi.com.au"
+LOG_FILE="${1:-exchange_rates.csv}"
+
+if [ -z "$API_KEY" ]; then
+    echo "Error: EXCHANGE_RATES_API_KEY environment variable not set"
+    exit 1
+fi
+
+# Create CSV header if file doesn't exist
+if [ ! -f "$LOG_FILE" ]; then
+    echo "Date,USD,EUR,GBP,JPY,CNY,Timestamp" > "$LOG_FILE"
+fi
+
+# Fetch latest rates
+response=$(curl -s -H "Authorization: Bearer $API_KEY" \
+               -H "User-Agent: DailyLogger/1.0" \
+               "$BASE_URL/latest")
+
+if echo "$response" | jq -e '.success' > /dev/null; then
+    date=$(echo "$response" | jq -r '.date')
+    timestamp=$(echo "$response" | jq -r '.timestamp')
+    usd=$(echo "$response" | jq -r '.rates.USD')
+    eur=$(echo "$response" | jq -r '.rates.EUR')
+    gbp=$(echo "$response" | jq -r '.rates.GBP')
+    jpy=$(echo "$response" | jq -r '.rates.JPY')
+    cny=$(echo "$response" | jq -r '.rates.CNY')
+    
+    # Append to CSV
+    echo "$date,$usd,$eur,$gbp,$jpy,$cny,$timestamp" >> "$LOG_FILE"
+    echo "Logged rates for $date to $LOG_FILE"
+else
+    error_info=$(echo "$response" | jq -r '.error.info')
+    echo "Error: $error_info"
+    exit 1
+fi
+```
+
+## Error Handling
+
+### Check Response Status
+
+```bash
+# Function to check if response is successful
+check_response() {
+    local response="$1"
+    
+    if echo "$response" | jq -e '.success' > /dev/null; then
+        return 0  # Success
+    else
+        local error_code=$(echo "$response" | jq -r '.error.code // 0')
+        local error_info=$(echo "$response" | jq -r '.error.info // "Unknown error"')
+        echo "API Error $error_code: $error_info" >&2
+        return 1  # Failure
+    fi
+}
+
+# Usage
+response=$(curl -s -H "Authorization: Bearer $API_KEY" \
+               "$BASE_URL/latest")
+
+if check_response "$response"; then
+    echo "Request successful!"
+    # Process response...
+else
+    echo "Request failed"
+    exit 1
+fi
+```
+
+### Rate Limit Headers
+
+```bash
+# Check rate limit headers
+check_rate_limits() {
+    curl -i -H "Authorization: Bearer $API_KEY" \
+         "$BASE_URL/latest" | head -20
+}
+
+# Extract specific headers
+get_remaining_requests() {
+    curl -s -I -H "Authorization: Bearer $API_KEY" \
+         "$BASE_URL/latest" | \
+    grep -i "x-ratelimit-remaining-daily" | \
+    cut -d: -f2 | tr -d ' \r'
+}
+
+echo "Remaining requests today: $(get_remaining_requests)"
+```
+
+## Advanced Usage
+
+### Batch Processing
+
+```bash
+#!/bin/bash
+# batch-historical.sh - Get historical rates for multiple dates
+
+API_KEY="${EXCHANGE_RATES_API_KEY:-}"
+BASE_URL="https://api.exchangeratesapi.com.au"
+
+# Array of dates to fetch
+dates=(
+    "2024-01-01"
+    "2024-01-15"
+    "2024-01-31"
+)
+
+currencies=("USD" "EUR" "GBP")
+
+echo "Date,Currency,Rate"
+
+for date in "${dates[@]}"; do
+    response=$(curl -s -H "Authorization: Bearer $API_KEY" \
+                   "$BASE_URL/$date")
+    
+    if echo "$response" | jq -e '.success' > /dev/null; then
+        for currency in "${currencies[@]}"; do
+            rate=$(echo "$response" | jq -r ".rates.$currency")
+            echo "$date,$currency,$rate"
+        done
+    else
+        echo "Error fetching $date: $(echo "$response" | jq -r '.error.info')" >&2
+    fi
+    
+    # Be nice to the API
+    sleep 0.1
+done
+```
+
+### JSON Processing
+
+```bash
+# Pretty print JSON response
+curl -H "Authorization: Bearer $API_KEY" \
+     https://api.exchangeratesapi.com.au/latest | jq '.'
+
+# Extract specific values
+USD_RATE=$(curl -s -H "Authorization: Bearer $API_KEY" \
+               https://api.exchangeratesapi.com.au/latest | \
+           jq -r '.rates.USD')
+
+echo "Current USD rate: $USD_RATE"
+
+# Filter currencies
+curl -s -H "Authorization: Bearer $API_KEY" \
+     https://api.exchangeratesapi.com.au/latest | \
+jq '{date: .date, major_currencies: {USD: .rates.USD, EUR: .rates.EUR, GBP: .rates.GBP}}'
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Python SDK"
+    icon="python"
+    href="/sdks/python"
+  >
+    Python examples and best practices
+  </Card>
+  <Card
+    title="PHP SDK"
+    icon="php"
+    href="/sdks/php"
+  >
+    PHP examples and Laravel integration
+  </Card>
+  <Card
+    title="JavaScript SDK"
+    icon="js"
+    href="/sdks/javascript"
+  >
+    JavaScript/Node.js examples and React hooks
+  </Card>
+  <Card
+    title="API Reference"
+    icon="book"
+    href="/api-reference"
+  >
+    Complete API documentation
+  </Card>
+</CardGroup>
