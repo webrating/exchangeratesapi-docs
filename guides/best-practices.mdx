@@ -574,7 +574,7 @@ class QuotaManager {
 }
 
 // Usage
-const quotaManager = new QuotaManager('buderim_your_api_key_here');
+const quotaManager = new QuotaManager('your_api_key_here');
 
 try {
   const rates = await quotaManager.makeRequest('/latest');
@@ -689,7 +689,7 @@ class BatchProcessor {
 }
 
 // Usage
-const batcher = new BatchProcessor('buderim_your_api_key_here');
+const batcher = new BatchProcessor('your_api_key_here');
 
 // These will be batched into a single API call
 const promises = [
@@ -864,7 +864,7 @@ class APIMonitor {
 }
 
 // Usage
-const monitor = new APIMonitor('buderim_your_api_key_here');
+const monitor = new APIMonitor('your_api_key_here');
 
 // Monitor requests
 const rates = await monitor.monitoredRequest('/latest');

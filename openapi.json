@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "RBA Exchange Rates API",
     "description": "Official Reserve Bank of Australia (RBA) exchange rate data through a modern REST API. Transforms publicly available RBA data into clean JSON endpoints for Australian businesses and developers who need reliable AUD exchange rates.",
@@ -17,17 +17,12 @@
       "description": "Production API"
     }
   ],
-  "security": [
-    {
-      "ApiKeyAuth": []
-    }
-  ],
   "paths": {
     "/": {
       "get": {
+        "operationId": "getApiRoot",
         "summary": "API Root",
         "description": "Returns basic API information and documentation link",
-        "security": [],
         "responses": {
           "200": {
             "description": "API information",
@@ -50,9 +45,9 @@
     },
     "/status": {
       "get": {
+        "operationId": "getApiStatus",
         "summary": "API Status",
         "description": "Returns operational status of the API including last update time and data freshness",
-        "security": [],
         "responses": {
           "200": {
             "description": "API status information",
@@ -85,9 +80,9 @@
     },
     "/symbols": {
       "get": {
+        "operationId": "getSupportedCurrencies",
         "summary": "Supported Currencies",
         "description": "List all supported currencies with their names, symbols, and countries",
-        "security": [],
         "responses": {
           "200": {
             "description": "List of supported currencies",
@@ -122,9 +117,9 @@
     },
     "/convert": {
       "get": {
+        "operationId": "convertCurrency",
         "summary": "Currency Conversion",
         "description": "Convert amounts between currencies. Free tier available with rate limiting. Historical conversion requires authentication.",
-        "security": [],
         "parameters": [
           {
             "name": "from",
@@ -166,7 +161,7 @@
             "description": "Historical date for conversion (YYYY-MM-DD). Requires authentication.",
             "schema": {
               "type": "string",
-              "format": "date"
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "example": "2025-08-31"
           }
@@ -225,8 +220,14 @@
     },
     "/latest": {
       "get": {
+        "operationId": "getLatestRates",
         "summary": "Latest Exchange Rates",
         "description": "Get all current exchange rates from the Reserve Bank of Australia",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Latest exchange rates",
@@ -260,8 +261,14 @@
     },
     "/latest/{currency}": {
       "get": {
+        "operationId": "getLatestRateForCurrency",
         "summary": "Latest Rate for Currency",
         "description": "Get the current exchange rate for a specific currency",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "currency",
@@ -308,8 +315,14 @@
     },
     "/timeseries": {
       "get": {
+        "operationId": "getTimeseriesRates",
         "summary": "Historical Exchange Rates",
         "description": "Get exchange rates for a date range (maximum 365 days)",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "start_date",
@@ -318,7 +331,7 @@
             "description": "Start date (YYYY-MM-DD)",
             "schema": {
               "type": "string",
-              "format": "date"
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "example": "2025-08-01"
           },
@@ -329,7 +342,7 @@
             "description": "End date (YYYY-MM-DD)",
             "schema": {
               "type": "string",
-              "format": "date"
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "example": "2025-08-31"
           },
@@ -397,8 +410,14 @@
     },
     "/{date}": {
       "get": {
+        "operationId": "getHistoricalRatesForDate",
         "summary": "Historical Rates for Date",
         "description": "Get all exchange rates for a specific historical date",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "date",
@@ -407,7 +426,6 @@
             "description": "Date in YYYY-MM-DD format",
             "schema": {
               "type": "string",
-              "format": "date",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "example": "2025-08-31"
@@ -449,8 +467,14 @@
     },
     "/{date}/{currency}": {
       "get": {
+        "operationId": "getHistoricalRateForCurrencyAndDate",
         "summary": "Historical Rate for Currency and Date",
         "description": "Get the exchange rate for a specific currency on a specific historical date",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "date",
@@ -459,7 +483,6 @@
             "description": "Date in YYYY-MM-DD format",
             "schema": {
               "type": "string",
-              "format": "date",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "example": "2025-08-31"
@@ -641,7 +664,7 @@
           },
           "date": {
             "type": "string",
-            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "Date of the rates (YYYY-MM-DD)"
           },
           "rates": {
@@ -688,7 +711,7 @@
           },
           "date": {
             "type": "string",
-            "format": "date"
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "result": {
             "type": "number",
@@ -714,11 +737,11 @@
           },
           "start_date": {
             "type": "string",
-            "format": "date"
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "end_date": {
             "type": "string",
-            "format": "date"
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "base": {
             "type": "string",
