@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "RBA Exchange Rates API",
     "description": "Official Reserve Bank of Australia (RBA) exchange rate data through a modern REST API. Transforms publicly available RBA data into clean JSON endpoints for Australian businesses and developers who need reliable AUD exchange rates.",
@@ -225,7 +225,7 @@
         "description": "Get all current exchange rates from the Reserve Bank of Australia",
         "security": [
           {
-            "ApiKeyAuth": []
+            "bearerAuth": []
           }
         ],
         "responses": {
@@ -266,7 +266,7 @@
         "description": "Get the current exchange rate for a specific currency",
         "security": [
           {
-            "ApiKeyAuth": []
+            "bearerAuth": []
           }
         ],
         "parameters": [
@@ -320,7 +320,7 @@
         "description": "Get exchange rates for a date range (maximum 365 days)",
         "security": [
           {
-            "ApiKeyAuth": []
+            "bearerAuth": []
           }
         ],
         "parameters": [
@@ -415,7 +415,7 @@
         "description": "Get all exchange rates for a specific historical date",
         "security": [
           {
-            "ApiKeyAuth": []
+            "bearerAuth": []
           }
         ],
         "parameters": [
@@ -472,7 +472,7 @@
         "description": "Get the exchange rate for a specific currency on a specific historical date",
         "security": [
           {
-            "ApiKeyAuth": []
+            "bearerAuth": []
           }
         ],
         "parameters": [
@@ -533,7 +533,7 @@
   },
   "components": {
     "securitySchemes": {
-      "ApiKeyAuth": {
+      "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "API Key",
