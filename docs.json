@@ -80,6 +80,11 @@
     "global": {
       "anchors": [
         {
+          "anchor": "Home",
+          "href": "https://exchangeratesapi.com.au",
+          "icon": "house"
+        },
+        {
           "anchor": "Dashboard",
           "href": "https://app.exchangeratesapi.com.au/dashboard",
           "icon": "chart-line"
@@ -87,7 +92,7 @@
         {
           "anchor": "Status",
           "href": "https://status.exchangeratesapi.com.au",
-          "icon": "activity"
+          "icon": "wifi"
         },
         {
           "anchor": "Support",
