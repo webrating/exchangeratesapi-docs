@@ -1,0 +1,859 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RBA Exchange Rates API",
+    "description": "Official Reserve Bank of Australia (RBA) exchange rate data through a modern REST API. Transforms publicly available RBA data into clean JSON endpoints for Australian businesses and developers who need reliable AUD exchange rates.",
+    "version": "1.0.0",
+    "license": {
+      "name": "MIT"
+    },
+    "contact": {
+      "url": "https://exchangeratesapi.com.au"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.exchangeratesapi.com.au",
+      "description": "Production API"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "API Root",
+        "description": "Returns basic API information and documentation link",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RootResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "RBA Exchange Rates API",
+                  "documentation": "https://docs.exchangeratesapi.com.au",
+                  "version": "1.0.0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "summary": "API Status",
+        "description": "Returns operational status of the API including last update time and data freshness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API status information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                },
+                "example": {
+                  "status": "operational",
+                  "last_update": "2025-09-01T16:00:00Z",
+                  "stale": false,
+                  "region": "SYD"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/symbols": {
+      "get": {
+        "summary": "Supported Currencies",
+        "description": "List all supported currencies with their names, symbols, and countries",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "List of supported currencies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SymbolsResponse"
+                },
+                "example": {
+                  "success": true,
+                  "symbols": {
+                    "USD": {
+                      "name": "US Dollar",
+                      "symbol": "$",
+                      "country": "United States"
+                    },
+                    "EUR": {
+                      "name": "Euro",
+                      "symbol": "€",
+                      "country": "European Union"
+                    }
+                  },
+                  "count": 21,
+                  "base": "AUD",
+                  "note": "All rates are quoted as AUD per unit of foreign currency from the Reserve Bank of Australia"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert": {
+      "get": {
+        "summary": "Currency Conversion",
+        "description": "Convert amounts between currencies. Free tier available with rate limiting. Historical conversion requires authentication.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Source currency (currently only AUD supported)",
+            "schema": {
+              "type": "string",
+              "enum": ["AUD"]
+            },
+            "example": "AUD"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "Target currency code",
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyCode"
+            },
+            "example": "USD"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": true,
+            "description": "Amount to convert",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": true
+            },
+            "example": 100
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Historical date for conversion (YYYY-MM-DD). Requires authentication.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-08-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversion result",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Request limit per time window",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Remaining requests in current window",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConvertResponse"
+                },
+                "example": {
+                  "success": true,
+                  "query": {
+                    "from": "AUD",
+                    "to": "USD",
+                    "amount": 100
+                  },
+                  "info": {
+                    "timestamp": 1725148800,
+                    "rate": 0.678234
+                  },
+                  "date": "2025-09-01",
+                  "result": 67.8234,
+                  "free": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/latest": {
+      "get": {
+        "summary": "Latest Exchange Rates",
+        "description": "Get all current exchange rates from the Reserve Bank of Australia",
+        "responses": {
+          "200": {
+            "description": "Latest exchange rates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestRatesResponse"
+                },
+                "example": {
+                  "success": true,
+                  "timestamp": 1725148800,
+                  "base": "AUD",
+                  "date": "2025-09-01",
+                  "rates": {
+                    "USD": 0.678234,
+                    "EUR": 0.612345,
+                    "GBP": 0.534567
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/latest/{currency}": {
+      "get": {
+        "summary": "Latest Rate for Currency",
+        "description": "Get the current exchange rate for a specific currency",
+        "parameters": [
+          {
+            "name": "currency",
+            "in": "path",
+            "required": true,
+            "description": "Currency code",
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyCode"
+            },
+            "example": "USD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest exchange rate for currency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestRatesResponse"
+                },
+                "example": {
+                  "success": true,
+                  "timestamp": 1725148800,
+                  "base": "AUD",
+                  "date": "2025-09-01",
+                  "rates": {
+                    "USD": 0.678234
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/timeseries": {
+      "get": {
+        "summary": "Historical Exchange Rates",
+        "description": "Get exchange rates for a date range (maximum 365 days)",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-08-01"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-08-31"
+          },
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of currency codes to filter",
+            "schema": {
+              "type": "string"
+            },
+            "example": "USD,EUR,GBP"
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": false,
+            "description": "Base currency (currently only AUD supported)",
+            "schema": {
+              "type": "string",
+              "enum": ["AUD"],
+              "default": "AUD"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical exchange rates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeseriesResponse"
+                },
+                "example": {
+                  "success": true,
+                  "timeseries": true,
+                  "start_date": "2025-08-01",
+                  "end_date": "2025-08-31",
+                  "base": "AUD",
+                  "rates": {
+                    "2025-08-01": {
+                      "USD": 0.678234,
+                      "EUR": 0.612345
+                    },
+                    "2025-08-02": {
+                      "USD": 0.679123,
+                      "EUR": 0.613456
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/{date}": {
+      "get": {
+        "summary": "Historical Rates for Date",
+        "description": "Get all exchange rates for a specific historical date",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "example": "2025-08-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exchange rates for the specified date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestRatesResponse"
+                },
+                "example": {
+                  "success": true,
+                  "timestamp": 1725062400,
+                  "base": "AUD",
+                  "date": "2025-08-31",
+                  "rates": {
+                    "USD": 0.678234,
+                    "EUR": 0.612345,
+                    "GBP": 0.534567
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/{date}/{currency}": {
+      "get": {
+        "summary": "Historical Rate for Currency and Date",
+        "description": "Get the exchange rate for a specific currency on a specific historical date",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "example": "2025-08-31"
+          },
+          {
+            "name": "currency",
+            "in": "path",
+            "required": true,
+            "description": "Currency code",
+            "schema": {
+              "$ref": "#/components/schemas/CurrencyCode"
+            },
+            "example": "USD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exchange rate for the specified currency and date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestRatesResponse"
+                },
+                "example": {
+                  "success": true,
+                  "timestamp": 1725062400,
+                  "base": "AUD",
+                  "date": "2025-08-31",
+                  "rates": {
+                    "USD": 0.678234
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "API key authentication using Bearer token"
+      }
+    },
+    "schemas": {
+      "CurrencyCode": {
+        "type": "string",
+        "enum": [
+          "AUD", "USD", "EUR", "GBP", "JPY", "CNY", "KRW", "INR", "SGD", 
+          "NZD", "THB", "MYR", "IDR", "VND", "HKD", "PHP", "CAD", "CHF", 
+          "TWD", "TWI", "SDR"
+        ],
+        "description": "Three-letter currency code"
+      },
+      "CurrencyInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name of the currency"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Currency symbol"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country or region"
+          }
+        },
+        "required": ["name", "symbol", "country"]
+      },
+      "RatesObject": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Exchange rate (AUD per unit of foreign currency)"
+        },
+        "description": "Object containing currency codes as keys and exchange rates as values"
+      },
+      "RootResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "documentation": {
+            "type": "string",
+            "format": "uri"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "message", "documentation", "version"]
+      },
+      "StatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["operational", "degraded"],
+            "description": "Current API status"
+          },
+          "last_update": {
+            "type": "string",
+            "description": "Last successful data update timestamp or 'unknown'"
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "Whether the data is considered stale"
+          },
+          "region": {
+            "type": "string",
+            "description": "Cloudflare region serving the request"
+          }
+        },
+        "required": ["status", "last_update", "stale", "region"]
+      },
+      "SymbolsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "symbols": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CurrencyInfo"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of supported currencies"
+          },
+          "base": {
+            "type": "string",
+            "example": "AUD"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "symbols", "count", "base", "note"]
+      },
+      "LatestRatesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp of the rate date"
+          },
+          "base": {
+            "type": "string",
+            "example": "AUD"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the rates (YYYY-MM-DD)"
+          },
+          "rates": {
+            "$ref": "#/components/schemas/RatesObject"
+          }
+        },
+        "required": ["success", "timestamp", "base", "date", "rates"]
+      },
+      "ConvertResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "query": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": ["from", "to", "amount"]
+          },
+          "info": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "integer",
+                "description": "Unix timestamp of the rate date"
+              },
+              "rate": {
+                "type": "number",
+                "description": "Exchange rate used for conversion"
+              }
+            },
+            "required": ["rate"]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "result": {
+            "type": "number",
+            "description": "Conversion result"
+          },
+          "free": {
+            "type": "boolean",
+            "description": "Indicates if this was a free (unauthenticated) request"
+          }
+        },
+        "required": ["success", "query", "info", "date", "result"]
+      },
+      "TimeseriesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "timeseries": {
+            "type": "boolean",
+            "example": true
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "base": {
+            "type": "string",
+            "example": "AUD"
+          },
+          "rates": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RatesObject"
+            },
+            "description": "Object with dates as keys and rate objects as values"
+          }
+        },
+        "required": ["success", "timeseries", "start_date", "end_date", "base", "rates"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "description": "HTTP status code"
+              },
+              "type": {
+                "type": "string",
+                "description": "Error type identifier"
+              },
+              "info": {
+                "type": "string",
+                "description": "Human-readable error description"
+              }
+            },
+            "required": ["code", "type", "info"]
+          }
+        },
+        "required": ["success", "error"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request - invalid parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 400,
+                "type": "bad_request",
+                "info": "Invalid currency format. Use 3-letter currency code (e.g., USD)"
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 401,
+                "type": "unauthorized",
+                "info": "Invalid or missing API key"
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 404,
+                "type": "not_found",
+                "info": "No data available for the specified date"
+              }
+            }
+          }
+        }
+      },
+      "RateLimitExceeded": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 429,
+                "type": "rate_limit",
+                "info": "Rate limit exceeded for free tier"
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Service temporarily unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 503,
+                "type": "unavailable",
+                "info": "Rates temporarily unavailable"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

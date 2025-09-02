@@ -26,6 +26,7 @@
       },
       {
         "tab": "API Reference",
+        "openapi": "/openapi.json",
         "groups": [
           {
             "group": "Public Endpoints",
@@ -38,7 +39,12 @@
           {
             "group": "Authenticated Endpoints",
             "pages": [
-              "api-reference/authenticated/latest"
+              "api-reference/authenticated/latest",
+              "api-reference/authenticated/latest-currency",
+              "api-reference/authenticated/timeseries",
+              "api-reference/authenticated/historical-date",
+              "api-reference/authenticated/historical-date-currency",
+              "api-reference/authenticated/convert-authenticated"
             ]
           }
         ]

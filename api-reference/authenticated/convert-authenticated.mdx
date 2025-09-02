@@ -1,0 +1,414 @@
+---
+title: 'Currency Conversion (Authenticated)'
+api: 'GET /convert'
+description: 'Convert amounts between currencies with unlimited requests and historical date support'
+---
+
+## Overview
+
+The authenticated conversion endpoint provides unlimited currency conversion with access to historical rates. Unlike the [free conversion endpoint](/api-reference/public/convert-free), this endpoint supports historical dates and has no rate limiting beyond your plan's daily quota.
+
+<Note>
+This endpoint requires authentication. [Get your API key](/quickstart) to start making requests.
+</Note>
+
+## Authentication
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token with your API key: `Bearer buderim_your_api_key_here`
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="from" type="string" required>
+  Source currency code. Currently only AUD is supported as the base currency.
+  
+  Value: `AUD`
+</ParamField>
+
+<ParamField query="to" type="string" required>
+  Target currency code (case-insensitive). Must be one of the [supported currencies](/api-reference/public/symbols).
+  
+  Examples: `USD`, `EUR`, `GBP`, `JPY`
+  
+  <Note>TWI (Trade-Weighted Index) is not allowed for conversion and will return a 400 error.</Note>
+</ParamField>
+
+<ParamField query="amount" type="number" required>
+  Amount to convert. Must be a positive number.
+  
+  Examples: `100`, `1500.50`, `0.01`
+</ParamField>
+
+<ParamField query="date" type="string" optional>
+  Historical date for conversion in YYYY-MM-DD format. If omitted, uses latest available rates.
+  
+  Examples: `2025-08-31`, `2024-12-31`, `2023-06-15`
+  
+  <Note>Historical dates require paid plan. Free plan users will receive a 400 error.</Note>
+</ParamField>
+
+## Request
+
+<CodeGroup>
+
+```bash cURL - Latest Rates
+curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100" \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```bash cURL - Historical Conversion
+curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100&date=2025-08-31" \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```javascript JavaScript
+// Latest conversion
+const params = new URLSearchParams({
+  from: 'AUD',
+  to: 'USD',
+  amount: '100'
+});
+
+const response = await fetch(`https://api.exchangeratesapi.com.au/convert?${params}`, {
+  headers: {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+  }
+});
+
+// Historical conversion
+const historicalParams = new URLSearchParams({
+  from: 'AUD',
+  to: 'USD',
+  amount: '100',
+  date: '2025-08-31'
+});
+
+const historicalResponse = await fetch(`https://api.exchangeratesapi.com.au/convert?${historicalParams}`, {
+  headers: {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+  }
+});
+```
+
+```python Python
+import requests
+
+# Latest conversion
+url = "https://api.exchangeratesapi.com.au/convert"
+headers = {
+    "Authorization": "Bearer buderim_your_api_key_here"
+}
+params = {
+    "from": "AUD",
+    "to": "USD",
+    "amount": 100
+}
+
+response = requests.get(url, headers=headers, params=params)
+data = response.json()
+
+# Historical conversion
+historical_params = {
+    "from": "AUD",
+    "to": "USD",
+    "amount": 100,
+    "date": "2025-08-31"
+}
+
+historical_response = requests.get(url, headers=headers, params=historical_params)
+historical_data = historical_response.json()
+```
+
+```php PHP
+<?php
+// Latest conversion
+$params = http_build_query([
+    'from' => 'AUD',
+    'to' => 'USD',
+    'amount' => 100
+]);
+
+$curl = curl_init();
+curl_setopt_array($curl, array(
+  CURLOPT_URL => "https://api.exchangeratesapi.com.au/convert?{$params}",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer buderim_your_api_key_here'
+  ),
+));
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+// Historical conversion
+$historical_params = http_build_query([
+    'from' => 'AUD',
+    'to' => 'USD',
+    'amount' => 100,
+    'date' => '2025-08-31'
+]);
+
+$historical_curl = curl_init();
+curl_setopt_array($historical_curl, array(
+  CURLOPT_URL => "https://api.exchangeratesapi.com.au/convert?{$historical_params}",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer buderim_your_api_key_here'
+  ),
+));
+
+$historical_response = curl_exec($historical_curl);
+curl_close($historical_curl);
+?>
+```
+
+</CodeGroup>
+
+## Response
+
+<ResponseExample>
+
+```json 200 OK - Latest Conversion
+{
+  "success": true,
+  "query": {
+    "from": "AUD",
+    "to": "USD", 
+    "amount": 100
+  },
+  "info": {
+    "timestamp": 1725148800,
+    "rate": 0.643512
+  },
+  "date": "2025-09-01",
+  "result": 64.3512
+}
+```
+
+```json 200 OK - Historical Conversion
+{
+  "success": true,
+  "query": {
+    "from": "AUD",
+    "to": "USD",
+    "amount": 100
+  },
+  "info": {
+    "timestamp": 1725062400,
+    "rate": 0.643512
+  },
+  "date": "2025-08-31",
+  "result": 64.3512
+}
+```
+
+</ResponseExample>
+
+### Response Fields
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="query" type="object">
+  Echo of the conversion parameters from the request
+  
+  <Expandable title="query object">
+    <ResponseField name="from" type="string">
+      Source currency code from request
+    </ResponseField>
+    <ResponseField name="to" type="string">
+      Target currency code from request
+    </ResponseField>
+    <ResponseField name="amount" type="number">
+      Amount to convert from request
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="info" type="object">
+  Information about the exchange rate used
+  
+  <Expandable title="info object">
+    <ResponseField name="timestamp" type="integer">
+      Unix timestamp for the rate date (midnight UTC). Only present for historical conversions.
+    </ResponseField>
+    <ResponseField name="rate" type="number">
+      Exchange rate used for conversion (AUD per unit of foreign currency) with up to 6 decimal places
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="date" type="string">
+  Date of the exchange rate used in YYYY-MM-DD format
+</ResponseField>
+
+<ResponseField name="result" type="number">
+  Conversion result with 4 decimal places
+</ResponseField>
+
+## Response Headers
+
+- `Cache-Control: no-store` - Response should not be cached
+- `X-Request-Id: <uuid>` - Unique request identifier for debugging
+- `X-Data-Stale: true` - Present only when serving fallback data (latest rates only)
+- `X-RBA-Source-Date: YYYY-MM-DD` - Present only when serving fallback data (latest rates only)
+
+## Error Responses
+
+<ResponseExample>
+
+```json 400 Bad Request - Missing Parameters
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Missing required parameters: from, to, amount"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Amount
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Invalid amount. Must be a positive number"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Base Currency
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Only AUD is supported as base currency"
+  }
+}
+```
+
+```json 400 Bad Request - TWI Not Allowed
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "TWI is not allowed for conversion"
+  }
+}
+```
+
+```json 400 Bad Request - Unsupported Currency
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Unsupported currency 'XYZ'"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Date Format
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Invalid date format. Use YYYY-MM-DD"
+  }
+}
+```
+
+```json 404 Not Found - Historical Data
+{
+  "success": false,
+  "error": {
+    "code": 404,
+    "type": "not_found",
+    "info": "No data available for date 2025-12-25"
+  }
+}
+```
+
+```json 401 Unauthorized
+{
+  "success": false,
+  "error": {
+    "code": 401,
+    "type": "unauthorized",
+    "info": "Invalid or missing API key"
+  }
+}
+```
+
+```json 503 Service Unavailable
+{
+  "success": false,
+  "error": {
+    "code": 503,
+    "type": "unavailable",
+    "info": "Rates temporarily unavailable"
+  }
+}
+```
+
+</ResponseExample>
+
+## Rate Limits
+
+This endpoint is subject to your plan's daily request limits:
+
+| Plan | Daily Requests | Historical Access | Rate Limiting |
+|------|----------------|-------------------|---------------|
+| Free | 50 | Latest rates only | No per-endpoint limits |
+| Starter | 1,000 | Last 90 days | No per-endpoint limits |
+| Professional | 10,000 | Full history (2018+) | No per-endpoint limits |
+| Business | Unlimited | Full history (2018+) | No per-endpoint limits |
+
+<Info>
+Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no additional rate limiting beyond your plan's daily quota.
+</Info>
+
+## Current Limitations
+
+<Warning>
+**Current API limitations:**
+- **Base currency**: Only AUD is supported as `from` currency
+- **TWI restriction**: Trade-Weighted Index cannot be used for conversions
+- **Date format**: Historical dates must be in YYYY-MM-DD format
+- **Date availability**: Weekend and holiday dates (when RBA doesn't publish) will return 404
+</Warning>
+
+## Precision & Calculation
+
+- **Rate precision**: Exchange rates provided with up to 6 decimal places
+- **Result precision**: Conversion results rounded to 4 decimal places
+- **Calculation method**: `result = amount × rate` using decimal-safe arithmetic
+- **Storage format**: Rates stored as micro-units (rate × 1e6) for precision
+- **Rounding**: Only applied at response boundary, not during calculations
+
+## Use Cases
+
+- **Invoice Processing**: Convert AUD amounts to foreign currencies for international transactions
+- **E-commerce**: Real-time price conversion for international customers
+- **Financial Analysis**: Historical conversion analysis with exact dated rates
+- **Accounting Integration**: Automated conversion with official RBA rates
+- **Compliance Reporting**: ATO-compliant currency conversion using official rates
+- **Contract Settlements**: Apply exact historical rates to dated agreements
+
+## Comparison with Free Endpoint
+
+| Feature | Free /convert | Authenticated /convert |
+|---------|---------------|------------------------|
+| Rate Limiting | 3 requests/hour | Plan-based daily limits |
+| Historical Dates | ❌ Not supported | ✅ Full access (paid plans) |
+| Authentication | ❌ Not required | ✅ Required |
+| Usage Tracking | ❌ IP-based only | ✅ Account-based |
+| Error Details | Basic | Comprehensive |
+| Support | Community | Plan-based SLA |

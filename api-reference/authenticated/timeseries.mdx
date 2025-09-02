@@ -1,0 +1,312 @@
+---
+title: 'Historical Exchange Rates'
+api: 'GET /timeseries'
+description: 'Get exchange rates for a date range with optional currency filtering (maximum 365 days)'
+---
+
+## Overview
+
+The timeseries endpoint returns historical exchange rates for a specified date range. You can optionally filter for specific currencies and limit the date range to a maximum of 365 days. This is perfect for building charts, analytics, and historical analysis.
+
+<Note>
+This endpoint requires authentication. [Get your API key](/quickstart) to start making requests.
+</Note>
+
+## Authentication
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token with your API key: `Bearer buderim_your_api_key_here`
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="start_date" type="string" required>
+  Start date in YYYY-MM-DD format. Must be a valid date from 2018-01-01 onwards.
+  
+  Example: `2025-08-01`
+</ParamField>
+
+<ParamField query="end_date" type="string" required>
+  End date in YYYY-MM-DD format. Must be after start_date with maximum 365 days difference.
+  
+  Example: `2025-08-31`
+</ParamField>
+
+<ParamField query="symbols" type="string" optional>
+  Comma-separated list of currency codes to filter results (case-insensitive). If omitted, all available currencies are returned.
+  
+  Example: `USD,EUR,GBP`
+</ParamField>
+
+<ParamField query="base" type="string" optional>
+  Base currency for the rates. Currently only AUD is supported.
+  
+  Default: `AUD`
+</ParamField>
+
+## Request
+
+<CodeGroup>
+
+```bash cURL - All Currencies
+curl "https://api.exchangeratesapi.com.au/timeseries?start_date=2025-08-01&end_date=2025-08-31" \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```bash cURL - Specific Currencies
+curl "https://api.exchangeratesapi.com.au/timeseries?start_date=2025-08-01&end_date=2025-08-31&symbols=USD,EUR,GBP" \
+  -H "Authorization: Bearer buderim_your_api_key_here"
+```
+
+```javascript JavaScript
+const params = new URLSearchParams({
+  start_date: '2025-08-01',
+  end_date: '2025-08-31',
+  symbols: 'USD,EUR,GBP'
+});
+
+const response = await fetch(`https://api.exchangeratesapi.com.au/timeseries?${params}`, {
+  headers: {
+    'Authorization': 'Bearer buderim_your_api_key_here'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+url = "https://api.exchangeratesapi.com.au/timeseries"
+headers = {
+    "Authorization": "Bearer buderim_your_api_key_here"
+}
+params = {
+    "start_date": "2025-08-01",
+    "end_date": "2025-08-31",
+    "symbols": "USD,EUR,GBP"
+}
+
+response = requests.get(url, headers=headers, params=params)
+data = response.json()
+print(data)
+```
+
+```php PHP
+<?php
+$params = http_build_query([
+    'start_date' => '2025-08-01',
+    'end_date' => '2025-08-31',
+    'symbols' => 'USD,EUR,GBP'
+]);
+
+$curl = curl_init();
+curl_setopt_array($curl, array(
+  CURLOPT_URL => "https://api.exchangeratesapi.com.au/timeseries?{$params}",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer buderim_your_api_key_here'
+  ),
+));
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+$data = json_decode($response, true);
+print_r($data);
+?>
+```
+
+</CodeGroup>
+
+## Response
+
+<ResponseExample>
+
+```json 200 OK
+{
+  "success": true,
+  "timeseries": true,
+  "start_date": "2025-08-01",
+  "end_date": "2025-08-31",
+  "base": "AUD",
+  "rates": {
+    "2025-08-01": {
+      "USD": 0.642100,
+      "EUR": 0.561800,
+      "GBP": 0.486200
+    },
+    "2025-08-02": {
+      "USD": 0.644000,
+      "EUR": 0.563100,
+      "GBP": 0.487500
+    },
+    "2025-08-05": {
+      "USD": 0.643800,
+      "EUR": 0.562700,
+      "GBP": 0.487100
+    }
+  }
+}
+```
+
+</ResponseExample>
+
+### Response Fields
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="timeseries" type="boolean">
+  Always true for timeseries responses
+</ResponseField>
+
+<ResponseField name="start_date" type="string">
+  Start date from the request in YYYY-MM-DD format
+</ResponseField>
+
+<ResponseField name="end_date" type="string">
+  End date from the request in YYYY-MM-DD format
+</ResponseField>
+
+<ResponseField name="base" type="string">
+  Base currency (always "AUD")
+</ResponseField>
+
+<ResponseField name="rates" type="object">
+  Object with dates as keys and rate objects as values
+  
+  <Expandable title="rates object structure">
+    <ResponseField name="{date}" type="object">
+      Each date key contains an object with currency codes and their rates
+      
+      <Expandable title="date object">
+        <ResponseField name="{currency}" type="number">
+          Exchange rate (AUD per unit of foreign currency) with up to 6 decimal places
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Response Headers
+
+- `Cache-Control: no-store` - Response should not be cached
+- `X-Request-Id: <uuid>` - Unique request identifier for debugging
+
+## Error Responses
+
+<ResponseExample>
+
+```json 400 Bad Request - Missing Parameters
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Missing required parameters: start_date, end_date"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Date Format
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Invalid date format. Use YYYY-MM-DD"
+  }
+}
+```
+
+```json 400 Bad Request - Date Range Too Large
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Date range cannot exceed 365 days"
+  }
+}
+```
+
+```json 400 Bad Request - Invalid Date Order
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "end_date must be after start_date"
+  }
+}
+```
+
+```json 400 Bad Request - Unsupported Currency
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "type": "bad_request",
+    "info": "Unsupported currency 'XYZ'"
+  }
+}
+```
+
+```json 404 Not Found - No Data Available
+{
+  "success": false,
+  "error": {
+    "code": 404,
+    "type": "not_found",
+    "info": "No data available for date range 2017-01-01 to 2017-12-31"
+  }
+}
+```
+
+```json 401 Unauthorized
+{
+  "success": false,
+  "error": {
+    "code": 401,
+    "type": "unauthorized",
+    "info": "Invalid or missing API key"
+  }
+}
+```
+
+</ResponseExample>
+
+## Rate Limits
+
+This endpoint is subject to your plan's daily request limits:
+
+| Plan | Daily Requests | Historical Access |
+|------|----------------|-------------------|
+| Free | 50 | Latest rates only |
+| Starter | 1,000 | Last 90 days |
+| Professional | 10,000 | Full history (2018+) |
+| Business | Unlimited | Full history (2018+) |
+
+<Warning>
+Free plan users cannot access historical data through this endpoint. Historical access requires a paid plan.
+</Warning>
+
+## Important Notes
+
+- **Weekend & Holiday Gaps**: The RBA doesn't publish rates on weekends or Australian public holidays. Missing dates are not included in the response.
+- **Maximum Range**: Date ranges cannot exceed 365 days
+- **Data Availability**: Historical data is available from January 1, 2018 onwards
+- **Currency Filtering**: Use the `symbols` parameter to reduce response size and focus on specific currencies
+- **Precision**: All rates are provided with up to 6 decimal places
+
+## Use Cases
+
+- **Historical Analysis**: Analyze currency trends over time
+- **Chart Generation**: Build time-series charts and graphs  
+- **Backtesting**: Test trading strategies with historical data
+- **Reporting**: Generate monthly/quarterly currency reports
+- **Research**: Academic and financial research projects
+- **Compliance**: ATO reporting with official RBA historical rates
