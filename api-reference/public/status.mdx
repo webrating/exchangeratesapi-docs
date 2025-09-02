@@ -53,7 +53,7 @@ echo "API Status: " . $data['status'];
   "status": "operational",
   "last_update": "2025-09-01T06:17:41.202Z",
   "stale": false,
-  "region": "SYD"
+  "next_update_expected": "2025-09-02T06:00:00.000Z"
 }
 ```
 
@@ -79,8 +79,8 @@ echo "API Status: " . $data['status'];
   - `true` - Data is stale (RBA update may have failed)
 </ResponseField>
 
-<ResponseField name="region" type="string" required>
-  Cloudflare data center that processed the request (e.g., "SYD", "MEL", "BNE")
+<ResponseField name="next_update_expected" type="string" required>
+  ISO 8601 timestamp of when the next RBA data update is expected (4 PM AEST next business day)
 </ResponseField>
 
 
@@ -97,14 +97,14 @@ echo "API Status: " . $data['status'];
 The Exchange Rates API fetches RBA data daily at **4:00 PM AEST**. The `stale` field helps you understand data freshness:
 
 ### Fresh Data (`stale: false`)
-- Last update was within expected timeframe (usually within 2 hours of 4 PM AEST)
+- Last update was within expected timeframe (within 26 hours of last business day 4 PM AEST)
 - RBA data fetch was successful
 - All systems operating normally
 
 ### Stale Data (`stale: true`)  
-- Last update was longer ago than expected
-- May indicate RBA website issues
-- Automatic fallback to previous day's rates is active
+- Last update was longer ago than expected (over 26 hours)
+- May indicate RBA website issues or weekend/holiday delay
+- Data is still valid but older than usual
 - Additional headers will be present on rate endpoints:
   - `X-Data-Stale: true`
   - `X-RBA-Source-Date: YYYY-MM-DD`
@@ -213,7 +213,7 @@ async function getAPIStatus() {
     status: data.status,
     lastUpdate: data.last_update,
     isStale: data.stale,
-    uptime: data.uptime
+    nextUpdate: data.next_update_expected
   };
 }
 ```
@@ -236,7 +236,7 @@ def monitor_api():
             'status': data['status'],
             'stale': data['stale'],
             'response_time': response.elapsed.total_seconds(),
-            'region': data['region']
+            'next_update': data['next_update_expected']
         }
         
         # Log to your monitoring system
