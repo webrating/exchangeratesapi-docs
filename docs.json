@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "willow",
   "name": "Exchange Rates API",
   "colors": {
     "primary": "#4742A9",
@@ -87,8 +87,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo.svg",
+    "dark": "/logo.svg"
   },
   "navbar": {
     "links": [
