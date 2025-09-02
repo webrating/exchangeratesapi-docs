@@ -31,20 +31,21 @@
           {
             "group": "Public Endpoints",
             "pages": [
-              "GET /",
-              "GET /status", 
-              "GET /symbols",
-              "GET /convert"
+              "api-reference/public/root",
+              "api-reference/public/status",
+              "api-reference/public/symbols",
+              "api-reference/public/convert-free"
             ]
           },
           {
             "group": "Authenticated Endpoints",
             "pages": [
-              "GET /latest",
-              "GET /latest/{currency}",
-              "GET /timeseries",
-              "GET /{date}",
-              "GET /{date}/{currency}"
+              "api-reference/authenticated/latest",
+              "api-reference/authenticated/latest-currency",
+              "api-reference/authenticated/timeseries",
+              "api-reference/authenticated/historical-date",
+              "api-reference/authenticated/historical-date-currency",
+              "api-reference/authenticated/convert-authenticated"
             ]
           }
         ]
