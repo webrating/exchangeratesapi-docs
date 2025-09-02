@@ -14,9 +14,7 @@ description: 'Welcome to the Exchange Rates API - Official Reserve Bank of Austr
   alt="Background Dark"
 />
 
-## Welcome to Exchange Rates API
-
-The Exchange Rates API is a developer-focused service providing **official Reserve Bank of Australia (RBA) exchange rate data** through clean, modern REST endpoints. We transform publicly available RBA data (currently only accessible via HTML/RSS) into instant JSON responses.
+The Exchange Rates API is a developer-focused data service providing **official Reserve Bank of Australia (RBA) exchange rate data** through clean, modern REST API endpoints. We transform publicly available and free RBA data (currently only accessible via HTML/RSS) into instant JSON responses.
 
 <CardGroup cols={2}>
   <Card
@@ -52,21 +50,21 @@ The Exchange Rates API is a developer-focused service providing **official Reser
 ## Why Exchange Rates API?
 
 The Reserve Bank of Australia publishes official exchange rates daily, but only provides this data in:
+
 - HTML tables requiring web scraping
 - RSS/XML feeds with complex RDF namespaces  
 - Excel files for historical data
 
 Australian businesses need this **official RBA data** for:
+
 - Tax compliance and ATO reporting
 - Invoice calculations for imports/exports
 - Financial reporting and auditing
 - E-commerce currency conversion
 - Accounting software integrations
 
-Currently, developers must build and maintain their own scrapers or pay expensive fees ($2,000+/year) for commercial APIs.
-
 <Note>
-**RBA Attribution Required**: All data is sourced from the Reserve Bank of Australia. We are not affiliated with or endorsed by the RBA. See our [compliance guide](/guides/compliance) for attribution requirements.
+All data is sourced from the Reserve Bank of Australia. We are not affiliated with or endorsed by the RBA. See our [compliance guide](/guides/compliance) for attribution requirements.
 </Note>
 
 ## Supported Currencies
@@ -92,7 +90,7 @@ We support all currencies published by the RBA:
     - **TWD** - Taiwan New Dollar
   </Accordion>
   
-  <Accordion title="Emerging Markets" icon="chart-line">
+  <Accordion title="Southeast Asia" icon="chart-line">
     - **INR** - Indian Rupee
     - **THB** - Thai Baht
     - **MYR** - Malaysian Ringgit
@@ -101,10 +99,6 @@ We support all currencies published by the RBA:
     - **PHP** - Philippine Peso
   </Accordion>
   
-  <Accordion title="Special" icon="star">
-    - **TWI** - Trade-Weighted Index (Australia)
-    - **SDR** - Special Drawing Rights (IMF)
-  </Accordion>
 </AccordionGroup>
 
 ## Quick Example

@@ -6,6 +6,8 @@ This repository contains the official documentation for the [Exchange Rates API]
 
 Visit [docs.exchangeratesapi.com.au](https://docs.exchangeratesapi.com.au) to view the complete documentation.
 
+Visit our website at [exchangeratesapi.com.au](https://exchangeratesapi.com.au) for more information.
+
 ## 🚀 API Overview
 
 The Exchange Rates API provides:
@@ -13,14 +15,13 @@ The Exchange Rates API provides:
 - **Real-time Rates**: Updated daily at 4:00 PM AEST
 - **Historical Data**: Complete history from 2018 onwards
 - **Simple REST API**: Clean JSON responses
-- **Multiple Formats**: Latest rates, historical data, time series, currency conversion
+- **Multiple Formats**: Latest rates, historical data, time series, currency conversion + more
 
 ## 🔗 Quick Links
 
 - **API Base URL**: `https://api.exchangeratesapi.com.au`
-- **Dashboard**: `https://app.exchangeratesapi.com.au`
+- **Get API Key**: `https://app.exchangeratesapi.com.au/login`
 - **Status Page**: `https://status.exchangeratesapi.com.au`
-- **Support**: support@exchangeratesapi.com.au
 
 ## 📝 Contributing
 
