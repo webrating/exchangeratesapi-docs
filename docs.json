@@ -95,12 +95,12 @@
         },
         {
           "anchor": "Status",
-          "href": "https://status.exchangeratesapi.com.au",
+          "href": "https://exchangeratesapi-com-au.openstatus.dev/",
           "icon": "wifi"
         },
         {
           "anchor": "Changelog",
-          "href": "https://docs.exchangeratesapi.com.au/changelog",
+          "href": "https://docs.exchangeratesapi.com.au/changelog/",
           "icon": "bolt"
         }
       ]

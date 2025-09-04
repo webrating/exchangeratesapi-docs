@@ -21,7 +21,7 @@ The Exchange Rates API provides:
 
 - **API Base URL**: `https://api.exchangeratesapi.com.au`
 - **Get API Key**: `https://app.exchangeratesapi.com.au/login`
-- **Status Page**: `https://status.exchangeratesapi.com.au`
+- **Status Page**: `https://exchangeratesapi-com-au.openstatus.dev/`
 
 ## 📝 Contributing
 
