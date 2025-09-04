@@ -176,7 +176,7 @@ print_r($data);
   "error": {
     "code": 404,
     "type": "not_found",
-    "info": "No USD rate available for date 2025-08-31"
+    "info": "No USD rate available for date 2025-08-31. RBA data may not be available for this date. Try /latest for current rates."
   }
 }
 ```
@@ -217,7 +217,8 @@ This endpoint is subject to your plan's daily request limits:
 | Business | Unlimited | Full history (2018+) |
 
 <Warning>
-Free plan users cannot access historical data through this endpoint. Historical access requires a paid plan.
+**Free Plan**: Access to last 7 days of historical data  
+**Paid Plans**: Full access to all historical data from 2018 onwards
 </Warning>
 
 ## Historical Data Availability

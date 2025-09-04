@@ -21,9 +21,9 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
 ## Query Parameters
 
 <ParamField query="from" type="string" required>
-  Source currency code. Currently only AUD is supported as the base currency.
+  Source currency code. All supported currencies are available for conversion.
   
-  Value: `AUD`
+  Examples: `AUD`, `USD`, `EUR`, `GBP`, `JPY`
 </ParamField>
 
 <ParamField query="to" type="string" required>
@@ -45,20 +45,25 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
   
   Examples: `2025-08-31`, `2024-12-31`, `2023-06-15`
   
-  <Note>Historical dates require paid plan. Free plan users will receive a 400 error.</Note>
+  <Note>Historical dates: Free plan users can access last 7 days. Paid plans have full historical access.</Note>
 </ParamField>
 
 ## Request
 
 <CodeGroup>
 
-```bash cURL - Latest Rates
+```bash cURL - Latest Rates (AUD to USD)
 curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100" \
   -H "Authorization: Bearer your_api_key_here"
 ```
 
+```bash cURL - Cross Currency (USD to EUR)
+curl "https://api.exchangeratesapi.com.au/convert?from=USD&to=EUR&amount=100" \
+  -H "Authorization: Bearer your_api_key_here"
+```
+
 ```bash cURL - Historical Conversion
-curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100&date=2025-08-31" \
+curl "https://api.exchangeratesapi.com.au/convert?from=EUR&to=GBP&amount=100&date=2025-08-31" \
   -H "Authorization: Bearer your_api_key_here"
 ```
 
@@ -407,7 +412,7 @@ Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no ad
 | Feature | Free /convert | Authenticated /convert |
 |---------|---------------|------------------------|
 | Rate Limiting | 3 requests/hour | Plan-based daily limits |
-| Historical Dates | ❌ Not supported | ✅ Full access (paid plans) |
+| Historical Dates | ✅ Last 7 days | ✅ Full access (7 days free, unlimited paid) |
 | Authentication | ❌ Not required | ✅ Required |
 | Usage Tracking | ❌ IP-based only | ✅ Account-based |
 | Error Details | Basic | Comprehensive |

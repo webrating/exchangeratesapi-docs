@@ -23,11 +23,19 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
 <ParamField query="start_date" type="string" required>
   Start date in YYYY-MM-DD format. Must be a valid date from 2018-01-01 onwards.
   
+  **Free Plan**: Limited to last 7 days only  
+  **Paid Plans**: Full access from 2018-01-01 onwards
+  
   Example: `2025-08-01`
 </ParamField>
 
 <ParamField query="end_date" type="string" required>
-  End date in YYYY-MM-DD format. Must be after start_date with maximum 365 days difference.
+  End date in YYYY-MM-DD format. Must be after start_date.
+  
+  **Free Plan**: Maximum 7 days range  
+  **Starter Plan**: Maximum 30 days range  
+  **Professional Plan**: Maximum 90 days range  
+  **Business/Enterprise Plans**: Maximum 365 days range
   
   Example: `2025-08-31`
 </ParamField>
@@ -302,7 +310,10 @@ This endpoint is subject to your plan's daily request limits:
 | Business | Unlimited | Full history (2018+) |
 
 <Warning>
-Free plan users cannot access historical data through this endpoint. Historical access requires a paid plan.
+**Free Plan**: Last 7 days access with 7-day maximum range  
+**Starter Plan**: 90 days access with 30-day maximum range  
+**Professional Plan**: Full history (2018+) with 90-day maximum range  
+**Business/Enterprise Plans**: Full history (2018+) with 365-day maximum range
 </Warning>
 
 ## Important Notes

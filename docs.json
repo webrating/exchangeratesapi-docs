@@ -137,8 +137,16 @@
         "header": "Legal",
         "items": [
           {
-            "label": "Legal",
-            "href": "https://docs.exchangeratesapi.com.au/legal/legal"
+            "label": "Privacy",
+            "href": "https://www.exchangeratesapi.com.au/privacy"
+          },
+          {
+            "label": "Terms",
+            "href": "https://www.exchangeratesapi.com.au/terms"
+          },
+          {
+            "label": "SLA",
+            "href": "https://www.exchangeratesapi.com.au/sla"
           }
         ]
       }

@@ -18,16 +18,35 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
   Bearer token with your API key: `Bearer your_api_key_here`
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="symbols" type="string" optional>
+  Comma-separated list of currency codes to filter results (case-insensitive). If omitted, all available currencies are returned.
+  
+  Examples: `USD,EUR,GBP`, `JPY,CAD,NZD`
+</ParamField>
+
+<ParamField query="base" type="string" optional>
+  Base currency for the rates. Currently only AUD is supported.
+  
+  Default: `AUD`
+</ParamField>
+
 ## Request
 
 <CodeGroup>
 
-```bash cURL
+```bash cURL - All Currencies
 curl https://api.exchangeratesapi.com.au/latest \
   -H "Authorization: Bearer your_api_key_here"
 ```
 
-```javascript JavaScript
+```bash cURL - Specific Currencies
+curl "https://api.exchangeratesapi.com.au/latest?symbols=USD,EUR,GBP" \
+  -H "Authorization: Bearer your_api_key_here"
+```
+
+```javascript JavaScript - All Currencies
 const response = await fetch('https://api.exchangeratesapi.com.au/latest', {
   headers: {
     'Authorization': 'Bearer your_api_key_here'
@@ -40,6 +59,24 @@ if (data.success) {
   console.log('Current USD rate:', data.rates.USD);
   console.log('Data from:', data.date);
   console.log('All rates:', data.rates);
+} else {
+  console.error('API Error:', data.error);
+}
+```
+
+```javascript JavaScript - Filtered Currencies
+const symbols = 'USD,EUR,GBP';
+const response = await fetch(`https://api.exchangeratesapi.com.au/latest?symbols=${symbols}`, {
+  headers: {
+    'Authorization': 'Bearer your_api_key_here'
+  }
+});
+
+const data = await response.json();
+
+if (data.success) {
+  console.log('Filtered rates:', data.rates);
+  console.log('Number of currencies:', Object.keys(data.rates).length);
 } else {
   console.error('API Error:', data.error);
 }

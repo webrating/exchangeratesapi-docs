@@ -125,10 +125,9 @@
             "name": "from",
             "in": "query",
             "required": true,
-            "description": "Source currency (currently only AUD supported)",
+            "description": "Source currency code",
             "schema": {
-              "type": "string",
-              "enum": ["AUD"]
+              "$ref": "#/components/schemas/CurrencyCode"
             },
             "example": "AUD"
           },
@@ -222,10 +221,33 @@
       "get": {
         "operationId": "getLatestRates",
         "summary": "Latest Exchange Rates",
-        "description": "Get all current exchange rates from the Reserve Bank of Australia",
+        "description": "Get all current exchange rates from the Reserve Bank of Australia with optional filtering",
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of currency codes to filter results",
+            "schema": {
+              "type": "string"
+            },
+            "example": "USD,EUR,GBP"
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": false,
+            "description": "Base currency (currently only AUD supported)",
+            "schema": {
+              "type": "string",
+              "enum": ["AUD"]
+            },
+            "example": "AUD"
           }
         ],
         "responses": {
@@ -872,6 +894,24 @@
                 "code": 503,
                 "type": "unavailable",
                 "info": "Rates temporarily unavailable"
+              }
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "Method not allowed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": 405,
+                "type": "method_not_allowed",
+                "info": "Method POST not allowed. Only GET, HEAD, and OPTIONS are supported."
               }
             }
           }
