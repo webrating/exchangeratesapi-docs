@@ -268,9 +268,9 @@ HTTP/2 200 OK
 Content-Type: application/json
 Cache-Control: no-store
 X-Request-Id: 123e4567-e89b-12d3-a456-426614174000
-X-RateLimit-Limit-Daily: 1000
-X-RateLimit-Remaining-Daily: 847
-X-RateLimit-Reset: 2025-09-02T00:00:00Z
+X-RateLimit-Limit-Monthly: 5000
+X-RateLimit-Remaining-Monthly: 4847
+X-RateLimit-Reset: 2025-10-01T00:00:00Z
 X-Response-Time: 45ms
 ```
 
@@ -513,7 +513,7 @@ echo "Data from: " . $rates['date'] . "\n";
       "error": {
         "code": 429,
         "type": "rate_limit_exceeded",
-        "info": "Daily quota of 1000 requests exceeded. Quota resets at midnight AEST."
+        "info": "Monthly quota of 5000 requests exceeded. Quota resets on your next billing cycle."
       }
     }
     ```

@@ -47,7 +47,7 @@ description: 'Common issues and solutions for the Exchange Rates API'
 
 ## Rate Limits
 
-### Daily Quota Exceeded (429)
+### Monthly Quota Exceeded (429)
 
 **Error Response:**
 ```json
@@ -56,13 +56,13 @@ description: 'Common issues and solutions for the Exchange Rates API'
   "error": {
     "code": 429,
     "type": "rate_limit_exceeded",
-    "info": "Daily quota of 1000 requests exceeded. Quota resets at midnight AEST."
+    "info": "Monthly quota of 5000 requests exceeded. Quota resets on your next billing cycle."
   }
 }
 ```
 
 **Fix:**
-- Wait until midnight AEST for reset
+- Wait until next billing cycle for reset
 - Cache responses (rates update once daily at 4 PM AEST)
 - Upgrade plan for higher quota
 
@@ -72,8 +72,8 @@ Free `/convert` endpoint: 3 requests/hour per IP.
 
 **Fix:**
 - Wait 1 hour
-- Sign up for 50 requests/day
-- Upgrade for unlimited
+- Sign up for 300 requests/month
+- Upgrade for higher limits
 
 ## Data Issues
 
@@ -144,8 +144,8 @@ Should return rate data
 ### 3. Check Rate Limits
 Look for headers:
 ```
-X-RateLimit-Limit-Daily: 1000
-X-RateLimit-Remaining-Daily: 847
+X-RateLimit-Limit-Monthly: 5000
+X-RateLimit-Remaining-Monthly: 4847
 ```
 
 ## Contacting Support

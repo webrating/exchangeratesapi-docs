@@ -5,22 +5,22 @@ description: 'Understanding API quotas, rate limits, and plan tiers for the Exch
 
 ## Rate Limit Overview
 
-The Exchange Rates API uses a **daily quota system** with different limits based on your subscription plan. Rate limits ensure fair usage and optimal performance for all users.
+The Exchange Rates API uses a **monthly quota system** with different limits based on your subscription plan. Rate limits ensure fair usage and optimal performance for all users.
 
 <Note>
-All rate limits are calculated in **Australian Eastern Time (AEST/AEDT)** and reset at midnight.
+All rate limits are calculated based on your **billing cycle** and reset on your monthly renewal date.
 </Note>
 
 ## Plan Comparison
 
 <Card title="Plan Tiers">
 
-| Plan | Price (AUD/month) | Daily Requests | Historical Data | Max Range | Support |
-|------|-------------------|----------------|-----------------|-----------|---------|
-| **Free** | $0 | 50 | Last 7 days | 7 days | Community |
-| **Starter** | $19 | 1,000 | 90 days | 30 days | Email (48h) |
-| **Professional** | $79 | 10,000 | Full (2018+) | 90 days | Email (24h) |
-| **Business** | $249 | Unlimited | Full + Premium | 365 days | Phone (4h) |
+| Plan | Price (AUD/month) | Monthly Requests | Historical Data | Max Range | Support |
+|------|-------------------|------------------|-----------------|-----------|---------|
+| **Free** | $0 | 300 | Last 7 days | 7 days | Community |
+| **Starter** | $29 | 5,000 | 90 days | 30 days | Email (48h) |
+| **Professional** | $79 | 50,000 | Full (2018+) | 90 days | Email (24h) |
+| **Business** | $299 | 500,000 | Full + Premium | 365 days | Phone (4h) |
 
 </Card>
 
@@ -33,7 +33,7 @@ The free tier is perfect for:
 - Proof of concept implementations
 
 **Limitations:**
-- 50 requests per day
+- 300 requests per month
 - Last 7 days of historical data
 - Community support only
 - No SLA guarantees
@@ -41,7 +41,7 @@ The free tier is perfect for:
 ### Paid Plans Benefits
 
 All paid plans include:
-- Higher daily quotas
+- Higher monthly quotas
 - Historical data access
 - Priority support
 - 99.9% uptime SLA
@@ -60,17 +60,17 @@ curl -i https://api.exchangeratesapi.com.au/latest \
 
 ```http
 HTTP/2 200
-X-RateLimit-Limit-Daily: 1000
-X-RateLimit-Remaining-Daily: 847
-X-RateLimit-Reset: 2025-09-02T00:00:00Z
+X-RateLimit-Limit-Monthly: 5000
+X-RateLimit-Remaining-Monthly: 4847
+X-RateLimit-Reset: 2025-10-01T00:00:00Z
 X-Request-Id: 123e4567-e89b-12d3-a456-426614174000
 ```
 
 | Header | Description |
 |--------|-------------|
-| `X-RateLimit-Limit-Daily` | Total daily quota for your plan |
-| `X-RateLimit-Remaining-Daily` | Remaining requests today |
-| `X-RateLimit-Reset` | When the quota resets (midnight AEST/AEDT) |
+| `X-RateLimit-Limit-Monthly` | Total monthly quota for your plan |
+| `X-RateLimit-Remaining-Monthly` | Remaining requests this month |
+| `X-RateLimit-Reset` | When the quota resets (next billing cycle) |
 | `X-Request-Id` | Unique identifier for debugging |
 
 ## Free Endpoint Rate Limits
@@ -99,7 +99,7 @@ X-RateLimit-Window: 3600
 
 ## Rate Limit Exceeded Responses
 
-### Daily Quota Exceeded (Authenticated)
+### Monthly Quota Exceeded (Authenticated)
 
 ```json
 {
@@ -107,7 +107,7 @@ X-RateLimit-Window: 3600
   "error": {
     "code": 429,
     "type": "rate_limit_exceeded",
-    "info": "Daily quota of 1000 requests exceeded. Quota resets at midnight AEST."
+    "info": "Monthly quota of 5000 requests exceeded. Quota resets on your next billing cycle."
   }
 }
 ```
@@ -130,8 +130,8 @@ X-RateLimit-Window: 3600
 ### Dashboard Analytics
 Track your API usage in the [dashboard](https://app.exchangeratesapi.com.au):
 
-- **Daily Usage**: Requests made today
-- **Historical Usage**: 30-day usage chart
+- **Monthly Usage**: Requests made this billing cycle
+- **Historical Usage**: 12-month usage chart
 - **Top Endpoints**: Most frequently used endpoints
 - **Response Times**: Average API performance
 - **Error Rates**: Success vs error rates
@@ -156,7 +156,7 @@ class ExchangeRatesAPI {
     if (this.remainingRequests !== null && this.remainingRequests <= 0) {
       const now = new Date();
       if (now < new Date(this.quotaResetTime)) {
-        throw new Error('Daily quota exceeded. Try again after midnight AEST.');
+        throw new Error('Monthly quota exceeded. Try again after your billing cycle resets.');
       }
     }
     
@@ -166,7 +166,7 @@ class ExchangeRatesAPI {
     
     // Update rate limit info from headers
     this.remainingRequests = parseInt(
-      response.headers.get('X-RateLimit-Remaining-Daily')
+      response.headers.get('X-RateLimit-Remaining-Monthly')
     );
     this.quotaResetTime = response.headers.get('X-RateLimit-Reset');
     
@@ -200,13 +200,13 @@ class ExchangeRatesAPI:
             if datetime.now() < datetime.fromisoformat(
                 self.quota_reset_time.replace('Z', '+00:00')
             ):
-                raise Exception('Daily quota exceeded. Try again after midnight AEST.')
+                raise Exception('Monthly quota exceeded. Try again after your billing cycle resets.')
         
         response = requests.get(f'{self.base_url}{endpoint}', headers=self.headers)
         
         # Update rate limit info
         self.remaining_requests = int(
-            response.headers.get('X-RateLimit-Remaining-Daily', 0)
+            response.headers.get('X-RateLimit-Remaining-Monthly', 0)
         )
         self.quota_reset_time = response.headers.get('X-RateLimit-Reset')
         
@@ -221,7 +221,7 @@ class ExchangeRatesAPI:
 
 ### 2. Cache Responses Intelligently
 
-RBA data updates once daily at 4 PM AEST, so cache aggressively:
+RBA data updates once daily at 4 PM AEST, so cache aggressively to minimize monthly quota usage:
 
 ```javascript
 class CachedExchangeRates {
@@ -266,7 +266,7 @@ async function robustApiCall(apiClient, endpoint) {
   } catch (error) {
     if (error.message.includes('quota exceeded')) {
       // Log the issue and return cached data if available
-      console.warn('API quota exceeded, using cached data');
+      console.warn('Monthly API quota exceeded, using cached data');
       return getCachedData(endpoint);
     }
     
@@ -305,7 +305,7 @@ const gbpRate = allRates.rates.GBP;
 ### When to Upgrade
 
 Consider upgrading when you:
-- Consistently hit daily quotas
+- Consistently hit monthly quotas
 - Need historical data access
 - Require faster support response
 - Want SLA guarantees
