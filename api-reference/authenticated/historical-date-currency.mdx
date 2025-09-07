@@ -207,17 +207,18 @@ print_r($data);
 
 ## Rate Limits
 
-This endpoint is subject to your plan's daily request limits:
+This endpoint is subject to your plan's monthly request limits:
 
-| Plan | Daily Requests | Historical Access |
-|------|----------------|-------------------|
-| Free | 50 | Last 7 days |
-| Starter | 1,000 | Last 90 days |
-| Professional | 10,000 | Full history (2018+) |
-| Business | Unlimited | Full history (2018+) |
+| Plan | Monthly Requests | Historical Access |
+|------|------------------|-------------------|
+| Free | 300 | No historical data |
+| Starter | 5,000 | Last 30 days |
+| Professional | 50,000 | Full history (2018+) |
+| Business | 500,000 | Full history (2018+) |
 
 <Warning>
-**Free Plan**: Access to last 7 days of historical data  
+**Free Plan**: No access to historical data  
+**Starter Plan**: Access to last 30 days of historical data  
 **Paid Plans**: Full access to all historical data from 2018 onwards
 </Warning>
 
@@ -235,8 +236,8 @@ The RBA doesn't publish exchange rates on:
 Requests for these dates will return a 404 Not Found error.
 
 ### Plan-Specific Access
-- **Free Plan**: Only current/latest rates available
-- **Starter Plan**: Last 90 days of historical data
+- **Free Plan**: No historical data access
+- **Starter Plan**: Last 30 days of historical data
 - **Professional & Business Plans**: Full historical archive (2018 onwards)
 
 ## Currency Availability

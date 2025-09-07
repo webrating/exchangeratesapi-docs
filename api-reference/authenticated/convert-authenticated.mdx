@@ -45,7 +45,7 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
   
   Examples: `2025-08-31`, `2024-12-31`, `2023-06-15`
   
-  <Note>Historical dates: Free plan users can access last 7 days. Paid plans have full historical access.</Note>
+  <Note>Historical dates: Free plan has no historical access. Starter plan has 30 days access. Professional/Business plans have full historical access.</Note>
 </ParamField>
 
 ## Request
@@ -367,17 +367,17 @@ curl_close($historical_curl);
 
 ## Rate Limits
 
-This endpoint is subject to your plan's daily request limits:
+This endpoint is subject to your plan's monthly request limits:
 
-| Plan | Daily Requests | Historical Access | Rate Limiting |
-|------|----------------|-------------------|---------------|
-| Free | 50 | Last 7 days | No per-endpoint limits |
-| Starter | 1,000 | Last 90 days | No per-endpoint limits |
-| Professional | 10,000 | Full history (2018+) | No per-endpoint limits |
-| Business | Unlimited | Full history (2018+) | No per-endpoint limits |
+| Plan | Monthly Requests | Historical Access | Rate Limiting |
+|------|------------------|-------------------|---------------|
+| Free | 300 | No historical data | No per-endpoint limits |
+| Starter | 5,000 | Last 30 days | No per-endpoint limits |
+| Professional | 50,000 | Full history (2018+) | No per-endpoint limits |
+| Business | 500,000 | Full history (2018+) | No per-endpoint limits |
 
 <Info>
-Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no additional rate limiting beyond your plan's daily quota.
+Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no additional rate limiting beyond your plan's monthly quota.
 </Info>
 
 ## Current Limitations
@@ -411,8 +411,8 @@ Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no ad
 
 | Feature | Free /convert | Authenticated /convert |
 |---------|---------------|------------------------|
-| Rate Limiting | 3 requests/hour | Plan-based daily limits |
-| Historical Dates | ✅ Last 7 days | ✅ Full access (7 days free, unlimited paid) |
+| Rate Limiting | 3 requests/hour | Plan-based monthly limits |
+| Historical Dates | ❌ Not supported | ✅ Full access (based on plan) |
 | Authentication | ❌ Not required | ✅ Required |
 | Usage Tracking | ❌ IP-based only | ✅ Account-based |
 | Error Details | Basic | Comprehensive |
