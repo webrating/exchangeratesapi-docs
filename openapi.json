@@ -347,7 +347,7 @@
       "get": {
         "operationId": "getTimeseriesRates",
         "summary": "Historical Exchange Rates",
-        "description": "Get exchange rates for a date range. Historical access: Free=blocked, Starter=30 days, Professional/Business=full history. Date range limits: Starter=30 days, Professional=90 days, Business=365 days.",
+        "description": "Get exchange rates for a date range. Historical access: Free=blocked, Starter=30 days, Professional/Business=full history. Date range limits: Starter=7 days, Professional=90 days, Business=365 days.",
         "security": [
           {
             "bearerAuth": []
@@ -627,7 +627,7 @@
         "additionalProperties": {
           "type": "number",
           "minimum": 0,
-          "description": "Exchange rate (AUD per unit of foreign currency)"
+          "description": "Exchange rate (AUD per unit of foreign currency) with precision varying by currency (up to 6 decimal places for most, whole numbers for IDR/VND as provided by RBA)"
         },
         "description": "Object containing currency codes as keys and exchange rates as values"
       },
@@ -787,7 +787,7 @@
               },
               "rate": {
                 "type": "number",
-                "description": "Exchange rate used for conversion"
+                "description": "Exchange rate used for conversion with precision varying by currency (up to 6 decimal places for most, whole numbers for IDR/VND as provided by RBA)"
               }
             },
             "required": [

@@ -191,7 +191,7 @@ if ($data['success']) {
 </ResponseField>
 
 <ResponseField name="rates.{CURRENCY}" type="number" required>
-  Exchange rate from AUD to the specified currency, precise to up to 6 decimal places
+  Exchange rate from AUD to the specified currency, with precision varying by currency (up to 6 decimal places for most, whole numbers for IDR/VND)
 </ResponseField>
 
 ## Understanding Exchange Rates
@@ -205,8 +205,11 @@ All rates are quoted as **AUD to foreign currency**:
 
 ### Precision
 - Rates are stored with micro-unit precision internally
-- API responses show up to 6 decimal places
-- Actual precision varies by currency (JPY has fewer decimals than USD)
+- API responses show up to 6 decimal places (varies by currency)
+- Actual precision varies by currency based on RBA source data:
+  - Most currencies: Up to 6 decimal places (e.g., USD: 0.6566)
+  - Some currencies: 2 decimal places (e.g., JPY: 97.26)
+  - IDR and VND: Whole numbers only (e.g., IDR: 10739, VND: 17338) as provided by RBA
 
 ### Special Currencies
 

@@ -21,7 +21,7 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
 ## Query Parameters
 
 <ParamField query="from" type="string" required>
-  Source currency code. All supported currencies are available for conversion.
+  Source currency code. All supported currencies are available for conversion, including cross-currency pairs (e.g., USD to EUR, JPY to GBP).
   
   Examples: `AUD`, `USD`, `EUR`, `GBP`, `JPY`
 </ParamField>
@@ -286,13 +286,13 @@ curl_close($historical_curl);
 }
 ```
 
-```json 400 Bad Request - Invalid Base Currency
+```json 400 Bad Request - Invalid Currency
 {
   "success": false,
   "error": {
     "code": 400,
     "type": "bad_request",
-    "info": "Only AUD is supported as base currency"
+    "info": "Unsupported currency 'XYZ'"
   }
 }
 ```
@@ -384,19 +384,29 @@ Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no ad
 
 <Warning>
 **Current API limitations:**
-- **Base currency**: Only AUD is supported as `from` currency
 - **TWI restriction**: Trade-Weighted Index cannot be used for conversions
 - **Date format**: Historical dates must be in YYYY-MM-DD format
 - **Date availability**: Weekend and holiday dates (when RBA doesn't publish) will return 404
+- **Rate precision**: Some currencies (IDR, VND) are provided as whole numbers by the RBA source data
 </Warning>
 
 ## Precision & Calculation
 
-- **Rate precision**: Exchange rates provided with up to 6 decimal places
+- **Rate precision**: Exchange rates provided with up to 6 decimal places (varies by currency)
+- **Currency-specific precision**: IDR and VND are provided as whole numbers by the Reserve Bank of Australia
 - **Result precision**: Conversion results rounded to 4 decimal places
 - **Calculation method**: `result = amount × rate` using decimal-safe arithmetic
-- **Storage format**: Rates stored as micro-units (rate × 1e6) for precision
+- **Storage format**: Rates stored as micro-units (rate × 1e6) for precision where applicable
 - **Rounding**: Only applied at response boundary, not during calculations
+
+### Currency Precision Table
+
+| Currency | Example Rate | Decimal Places | Source |
+|----------|-------------|----------------|--------|
+| USD, EUR, GBP | 0.6566 | Up to 4 | RBA |
+| JPY, KRW | 97.26 | Up to 2 | RBA |
+| IDR, VND | 10739 | 0 (whole numbers) | RBA |
+| Other currencies | Varies | Up to 6 | RBA |
 
 ## Use Cases
 

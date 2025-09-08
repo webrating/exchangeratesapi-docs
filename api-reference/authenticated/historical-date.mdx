@@ -144,7 +144,7 @@ print_r($data);
   
   <Expandable title="rates object">
     <ResponseField name="{currency}" type="number">
-      Exchange rate (AUD per unit of foreign currency) with up to 6 decimal places
+      Exchange rate (AUD per unit of foreign currency) with precision varying by currency (up to 6 decimal places for most, whole numbers for IDR/VND as provided by RBA)
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -250,7 +250,8 @@ Requests for these dates will return a 404 Not Found error.
 
 ## Precision & Standards
 
-- **Precision**: All rates provided with up to 6 decimal places
+- **Precision**: Rates provided with up to 6 decimal places (varies by currency)
+- **Currency-specific precision**: IDR and VND are provided as whole numbers by the RBA source data
 - **Source**: Official Reserve Bank of Australia daily rates
-- **Rounding**: Rates are stored as micro-units (rate × 1e6) and converted for display
+- **Rounding**: Rates are stored as micro-units (rate × 1e6) and converted for display where applicable
 - **Standards**: Complies with Australian financial reporting requirements

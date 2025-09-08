@@ -27,6 +27,10 @@ The Exchange Rates API provides:
 
 Found an error in the documentation? Please submit a pull request or open an issue. We welcome contributions to improve the documentation.
 
+## ⚖️ Disclaimer
+
+The RBA Exchange Rates API is not affiliated or endorsed by the Reserve Bank of Australia. We are not responsible for any loss or damage arising from the use of the Exchange Rates API. The API is provided "as is" without warranty of any kind, either express or implied.
+
 ## 📄 License
 
 This documentation is licensed under MIT License.

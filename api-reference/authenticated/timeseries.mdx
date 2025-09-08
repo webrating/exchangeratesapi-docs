@@ -34,7 +34,7 @@ This endpoint requires authentication. [Get your API key](/quickstart) to start 
   End date in YYYY-MM-DD format. Must be after start_date.
   
   **Free Plan**: No access to timeseries (blocked)  
-  **Starter Plan**: Maximum 30 days range  
+  **Starter Plan**: Maximum 7 days range  
   **Professional Plan**: Maximum 90 days range  
   **Business/Enterprise Plans**: Maximum 365 days range
   
@@ -193,7 +193,7 @@ print_r($data);
       
       <Expandable title="date object">
         <ResponseField name="{currency}" type="number">
-          Exchange rate (AUD per unit of foreign currency) with up to 6 decimal places
+          Exchange rate (AUD per unit of foreign currency) with precision varying by currency (up to 6 decimal places for most, whole numbers for IDR/VND as provided by RBA)
         </ResponseField>
       </Expandable>
     </ResponseField>
@@ -312,7 +312,7 @@ This endpoint is subject to your plan's monthly request limits:
 
 <Warning>
 **Free Plan**: No access to timeseries endpoint (blocked)  
-**Starter Plan**: 30 days access with 30-day maximum range  
+**Starter Plan**: 30 days access with 7-day maximum range  
 **Professional Plan**: Full history (2018+) with 90-day maximum range  
 **Business/Enterprise Plans**: Full history (2018+) with 365-day maximum range
 </Warning>
@@ -323,7 +323,7 @@ This endpoint is subject to your plan's monthly request limits:
 - **Maximum Range**: Date ranges cannot exceed 365 days
 - **Data Availability**: Historical data is available from January 1, 2018 onwards
 - **Currency Filtering**: Use the `symbols` parameter to reduce response size and focus on specific currencies
-- **Precision**: All rates are provided with up to 6 decimal places
+- **Precision**: Rates are provided with up to 6 decimal places (varies by currency; IDR and VND are whole numbers from RBA source data)
 
 ## Use Cases
 
