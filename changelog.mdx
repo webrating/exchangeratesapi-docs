@@ -22,8 +22,7 @@ description: 'Track all changes, updates, and new features added to the Exchange
 
 **Public (no auth)**
 - `GET /status` - API status
-- `GET /symbols` - Supported currencies  
-- `GET /convert` - Free conversion (3/hour per IP)
+- `GET /symbols` - Supported currencies
 
 **Authenticated**
 - `GET /latest` - Current rates
@@ -31,7 +30,7 @@ description: 'Track all changes, updates, and new features added to the Exchange
 - `GET /{date}` - Historical rates
 - `GET /{date}/{currency}` - Historical rate for currency
 - `GET /timeseries` - Date range rates
-- `GET /convert` - Unlimited conversions
+- `GET /convert` - Currency conversion (with optional historical date)
 
 ### Supported Currencies
 

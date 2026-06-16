@@ -263,13 +263,11 @@ Some endpoints don't require authentication:
 |----------|-------------|------------|
 | `GET /status` | API operational status | Unlimited |
 | `GET /symbols` | List supported currencies | Unlimited |
-| `GET /convert` (free) | Limited conversion | 3/hour per IP |
 
 ```bash
 # No authentication needed
 curl https://api.exchangeratesapi.com.au/status
 curl https://api.exchangeratesapi.com.au/symbols
-curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100"
 ```
 
 ## Testing Your Authentication

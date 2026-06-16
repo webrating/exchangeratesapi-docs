@@ -119,12 +119,11 @@
       "get": {
         "operationId": "convertCurrency",
         "summary": "Currency Conversion",
-        "description": "Convert amounts between currencies. Free tier: 300/month, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
+        "description": "Convert amounts between currencies. Requires authentication. Free tier: 300/month, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
         "security": [
           {
             "bearerAuth": []
-          },
-          {}
+          }
         ],
         "parameters": [
           {
@@ -205,8 +204,7 @@
                     "rate": 0.678234
                   },
                   "date": "2025-09-01",
-                  "result": 67.8234,
-                  "free": true
+                  "result": 67.8234
                 }
               }
             }
@@ -801,10 +799,6 @@
           "result": {
             "type": "number",
             "description": "Conversion result"
-          },
-          "free": {
-            "type": "boolean",
-            "description": "Indicates if this was a free (unauthenticated) request"
           }
         },
         "required": [

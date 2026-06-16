@@ -66,13 +66,12 @@ description: 'Common issues and solutions for the Exchange Rates API'
 - Cache responses (rates update once daily at 4 PM AEST)
 - Upgrade plan for higher quota
 
-### Free Tier Limit (429)
+### Free Plan Limit (429)
 
-Free `/convert` endpoint: 3 requests/hour per IP.
+The free plan allows 300 requests/month across all authenticated endpoints.
 
 **Fix:**
-- Wait 1 hour
-- Sign up for 300 requests/month
+- Wait until the next monthly reset
 - Upgrade for higher limits
 
 ## Data Issues
@@ -122,9 +121,9 @@ Free `/convert` endpoint: 3 requests/hour per IP.
 **Cause:** Browser security blocks direct API calls with authentication.
 
 **Fix:**
-- Use backend proxy for API calls
+- Use a backend proxy for API calls
 - Never put API keys in frontend code
-- For testing only: Use free `/convert` endpoint
+- For quick checks, the public `/status` and `/symbols` endpoints require no key
 
 ## Quick Diagnostics
 

@@ -47,8 +47,7 @@
             "group": "Public Endpoints",
             "pages": [
               "api-reference/public/status",
-              "api-reference/public/symbols",
-              "api-reference/public/convert-free"
+              "api-reference/public/symbols"
             ]
           },
           {

@@ -82,21 +82,6 @@ Some endpoints don't require authentication but have IP-based rate limits:
 |----------|-------|--------------|
 | `GET /status` | Unlimited | - |
 | `GET /symbols` | Unlimited | - |
-| `GET /convert` (free) | 3 requests | Per hour per IP |
-
-### Free Conversion Example
-
-```bash
-# No API key required, but limited to 3/hour per IP
-curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100"
-```
-
-Response includes rate limit headers:
-```http
-X-RateLimit-Limit: 3
-X-RateLimit-Remaining: 2
-X-RateLimit-Window: 3600
-```
 
 ## Rate Limit Exceeded Responses
 

@@ -1,12 +1,12 @@
 ---
-title: 'Currency Conversion for Date (/convert)'
+title: 'Currency Conversion (/convert)'
 openapi: 'GET /convert'
-description: 'Convert amounts between currencies with unlimited requests and historical date support'
+description: 'Convert amounts between currencies, with optional historical date support (requires authentication)'
 ---
 
 ## Overview
 
-The authenticated conversion endpoint provides unlimited currency conversion with access to historical rates. Unlike the [free conversion endpoint](/api-reference/public/convert-free), this endpoint supports historical dates and has no rate limiting beyond your plan's daily quota.
+The conversion endpoint converts an amount between any two supported currencies using AUD as the intermediary. It requires authentication and is subject to your plan's monthly quota. Pass an optional `date` parameter to convert using historical rates.
 
 <Note>
 This endpoint requires authentication. [Get your API key](/quickstart) to start making requests.
@@ -377,7 +377,7 @@ This endpoint is subject to your plan's monthly request limits:
 | Business | 500,000 | Full history (2018+) | No per-endpoint limits |
 
 <Info>
-Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no additional rate limiting beyond your plan's monthly quota.
+Conversion has no additional per-endpoint rate limiting beyond your plan's monthly quota.
 </Info>
 
 ## Current Limitations
@@ -417,13 +417,11 @@ Unlike the free `/convert` endpoint (3/hour), authenticated conversion has no ad
 - **Compliance Reporting**: ATO-compliant currency conversion using official rates
 - **Contract Settlements**: Apply exact historical rates to dated agreements
 
-## Comparison with Free Endpoint
+## Historical Conversion by Plan
 
-| Feature | Free /convert | Authenticated /convert |
-|---------|---------------|------------------------|
-| Rate Limiting | 3 requests/hour | Plan-based monthly limits |
-| Historical Dates | ❌ Not supported | ✅ Full access (based on plan) |
-| Authentication | ❌ Not required | ✅ Required |
-| Usage Tracking | ❌ IP-based only | ✅ Account-based |
-| Error Details | Basic | Comprehensive |
-| Support | Community | Plan-based SLA |
+| Plan | Monthly Requests | Historical Dates |
+|------|------------------|------------------|
+| Free | 300 | ❌ Not available |
+| Starter | 5,000 | ✅ Last 30 days |
+| Professional | 50,000 | ✅ Full history (2018+) |
+| Business | 500,000 | ✅ Full history (2018+) |

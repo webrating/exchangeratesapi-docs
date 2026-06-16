@@ -310,11 +310,11 @@ if (!data.success) {
 
 ## Free Tier Testing
 
-Want to try the API without signing up? Use our free conversion endpoint (3 requests/hour per IP):
+Want to try the API at no cost? Sign up for a [free API key](https://app.exchangeratesapi.com.au/login) (300 requests/month) and use it on any endpoint, including `/convert`:
 
 ```bash
-curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100"
-# No authentication required for free tier
+curl "https://api.exchangeratesapi.com.au/convert?from=AUD&to=USD&amount=100" \
+  -H "Authorization: Bearer your_api_key_here"
 ```
 
 ## Next Steps
