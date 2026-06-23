@@ -601,7 +601,7 @@
             }
           },
           "400": { "description": "Invalid url or currencies" },
-          "401": { "description": "No valid dashboard session" },
+          "401": { "description": "Missing or invalid API key (or dashboard session)" },
           "403": { "description": "Plan does not include webhooks, or subscription limit reached" }
         }
       },
@@ -625,7 +625,7 @@
               }
             }
           },
-          "401": { "description": "No valid dashboard session" }
+          "401": { "description": "Missing or invalid API key (or dashboard session)" }
         }
       }
     },
@@ -646,7 +646,7 @@
             "description": "Deleted",
             "content": { "application/json": { "example": { "success": true, "message": "Webhook deleted" } } }
           },
-          "401": { "description": "No valid dashboard session" },
+          "401": { "description": "Missing or invalid API key (or dashboard session)" },
           "404": { "description": "Not found or not owned by you" }
         }
       }
@@ -668,7 +668,7 @@
             "description": "Test attempted",
             "content": { "application/json": { "example": { "success": true, "responseStatus": 200, "message": "Test delivered" } } }
           },
-          "401": { "description": "No valid dashboard session" },
+          "401": { "description": "Missing or invalid API key (or dashboard session)" },
           "404": { "description": "Not found or not owned by you" }
         }
       }
