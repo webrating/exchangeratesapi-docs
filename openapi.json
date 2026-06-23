@@ -225,7 +225,7 @@
       "get": {
         "operationId": "getLatestRates",
         "summary": "Latest Exchange Rates",
-        "description": "Get all current exchange rates from the Reserve Bank of Australia with optional filtering. Monthly limits: Free=300, Starter=5,000, Professional=50,000, Business=500,000 requests.",
+        "description": "Get all current exchange rates from the Reserve Bank of Australia with optional filtering. Quota limits: Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
         "security": [
           {
             "bearerAuth": []
@@ -291,7 +291,7 @@
       "get": {
         "operationId": "getLatestRateForCurrency",
         "summary": "Latest Rate for Currency",
-        "description": "Get the current exchange rate for a specific currency. Monthly limits: Free=300, Starter=5,000, Professional=50,000, Business=500,000 requests.",
+        "description": "Get the current exchange rate for a specific currency. Quota limits: Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
         "security": [
           {
             "bearerAuth": []
@@ -1177,7 +1177,7 @@
               "error": {
                 "code": 429,
                 "type": "rate_limit",
-                "info": "Monthly quota exceeded. Free=300, Starter=5,000, Professional=50,000, Business=500,000 requests per month."
+                "info": "Quota exceeded. Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month."
               }
             }
           }
