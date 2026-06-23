@@ -119,7 +119,7 @@
       "get": {
         "operationId": "convertCurrency",
         "summary": "Currency Conversion",
-        "description": "Convert amounts between currencies. Requires authentication. Free tier: 300/month, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
+        "description": "Convert amounts between currencies. Requires authentication. Free tier: 300, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
         "security": [
           {
             "bearerAuth": []
@@ -562,27 +562,56 @@
     },
     "/api/webhook-subscriptions": {
       "servers": [
-        { "url": "https://auth.exchangeratesapi.com.au", "description": "Auth/account host" }
+        {
+          "url": "https://auth.exchangeratesapi.com.au",
+          "description": "Auth/account host"
+        }
       ],
       "post": {
         "operationId": "createWebhookSubscription",
         "summary": "Create Webhook Subscription",
         "description": "Create a webhook subscription (Professional plan or higher). Returns the signing secret once. Authenticate with your Bearer API key (or manage from your dashboard).",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["url"],
+                "required": [
+                  "url"
+                ],
                 "properties": {
-                  "url": { "type": "string", "format": "uri", "description": "HTTPS endpoint to receive deliveries. Public host only (no localhost/private IPs)." },
-                  "currencies": { "type": "array", "items": { "type": "string" }, "description": "Optional list of currency codes to receive. Omit for all currencies." },
-                  "description": { "type": "string", "description": "Optional label." }
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "HTTPS endpoint to receive deliveries. Public host only (no localhost/private IPs)."
+                  },
+                  "currencies": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Optional list of currency codes to receive. Omit for all currencies."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional label."
+                  }
                 }
               },
-              "example": { "url": "https://hooks.example.com/rba", "currencies": ["USD", "JPY"], "description": "Prod hook" }
+              "example": {
+                "url": "https://hooks.example.com/rba",
+                "currencies": [
+                  "USD",
+                  "JPY"
+                ],
+                "description": "Prod hook"
+              }
             }
           }
         },
@@ -595,21 +624,39 @@
                   "success": true,
                   "signingSecret": "3f9c4e2a1b7d8f60a5c3e1d9b2f4a6c83f9c4e2a1b7d8f60a5c3e1d9b2f4a6c8",
                   "warning": "Store this signing secret securely. It will not be shown again.",
-                  "subscription": { "id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6", "url": "https://hooks.example.com/rba", "currencies": ["USD", "JPY"], "description": "Prod hook" }
+                  "subscription": {
+                    "id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+                    "url": "https://hooks.example.com/rba",
+                    "currencies": [
+                      "USD",
+                      "JPY"
+                    ],
+                    "description": "Prod hook"
+                  }
                 }
               }
             }
           },
-          "400": { "description": "Invalid url or currencies" },
-          "401": { "description": "Missing or invalid API key (or dashboard session)" },
-          "403": { "description": "Plan does not include webhooks, or subscription limit reached" }
+          "400": {
+            "description": "Invalid url or currencies"
+          },
+          "401": {
+            "description": "Missing or invalid API key (or dashboard session)"
+          },
+          "403": {
+            "description": "Plan does not include webhooks, or subscription limit reached"
+          }
         }
       },
       "get": {
         "operationId": "listWebhookSubscriptions",
         "summary": "List Webhook Subscriptions",
         "description": "List your webhook subscriptions. The signing secret is never returned.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Subscriptions",
@@ -618,58 +665,123 @@
                 "example": {
                   "success": true,
                   "subscriptions": [
-                    { "id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6", "url": "https://hooks.example.com/rba", "currencies": ["USD", "JPY"], "description": "Prod hook", "isActive": true, "failureCount": 0, "lastSuccessAt": "2026-06-23T07:00:20.000Z", "createdAt": "2026-06-20T01:00:00Z" }
+                    {
+                      "id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+                      "url": "https://hooks.example.com/rba",
+                      "currencies": [
+                        "USD",
+                        "JPY"
+                      ],
+                      "description": "Prod hook",
+                      "isActive": true,
+                      "failureCount": 0,
+                      "lastSuccessAt": "2026-06-23T07:00:20.000Z",
+                      "createdAt": "2026-06-20T01:00:00Z"
+                    }
                   ],
                   "limit": 3
                 }
               }
             }
           },
-          "401": { "description": "Missing or invalid API key (or dashboard session)" }
+          "401": {
+            "description": "Missing or invalid API key (or dashboard session)"
+          }
         }
       }
     },
     "/api/webhook-subscriptions/{id}": {
       "servers": [
-        { "url": "https://auth.exchangeratesapi.com.au", "description": "Auth/account host" }
+        {
+          "url": "https://auth.exchangeratesapi.com.au",
+          "description": "Auth/account host"
+        }
       ],
       "delete": {
         "operationId": "deleteWebhookSubscription",
         "summary": "Delete Webhook Subscription",
         "description": "Delete one of your webhook subscriptions.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
             "description": "Deleted",
-            "content": { "application/json": { "example": { "success": true, "message": "Webhook deleted" } } }
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Webhook deleted"
+                }
+              }
+            }
           },
-          "401": { "description": "Missing or invalid API key (or dashboard session)" },
-          "404": { "description": "Not found or not owned by you" }
+          "401": {
+            "description": "Missing or invalid API key (or dashboard session)"
+          },
+          "404": {
+            "description": "Not found or not owned by you"
+          }
         }
       }
     },
     "/api/webhook-subscriptions/{id}/test": {
       "servers": [
-        { "url": "https://auth.exchangeratesapi.com.au", "description": "Auth/account host" }
+        {
+          "url": "https://auth.exchangeratesapi.com.au",
+          "description": "Auth/account host"
+        }
       ],
       "post": {
         "operationId": "testWebhookSubscription",
         "summary": "Send Test Webhook",
         "description": "Send a sample rates.test delivery to the subscription's URL so you can verify your endpoint and signature handling.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
             "description": "Test attempted",
-            "content": { "application/json": { "example": { "success": true, "responseStatus": 200, "message": "Test delivered" } } }
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "responseStatus": 200,
+                  "message": "Test delivered"
+                }
+              }
+            }
           },
-          "401": { "description": "Missing or invalid API key (or dashboard session)" },
-          "404": { "description": "Not found or not owned by you" }
+          "401": {
+            "description": "Missing or invalid API key (or dashboard session)"
+          },
+          "404": {
+            "description": "Not found or not owned by you"
+          }
         }
       }
     }
