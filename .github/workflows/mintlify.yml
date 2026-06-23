@@ -1,4 +1,8 @@
-name: Deploy Mintlify Documentation
+name: Validate Mintlify Documentation
+
+# The live site is deployed automatically by the Mintlify GitHub App on push to
+# master — this workflow does NOT deploy. It validates the docs (config JSON,
+# structure, and links) so broken changes are caught around publish.
 
 on:
   push:
@@ -7,40 +11,30 @@ on:
     branches: [master]
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        
+        uses: actions/checkout@v5
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '18'
-          
-      - name: Install Mintlify CLI
-        run: npm install -g mintlify
-        
-      - name: Validate Mintlify configuration
+          node-version: '20'
+
+      - name: Validate config JSON
         run: |
-          if [ ! -f "docs.json" ]; then
-            echo "Error: docs.json not found. Mintlify requires docs.json configuration file."
-            exit 1
+          node -e "JSON.parse(require('fs').readFileSync('docs.json','utf8'))" && echo "docs.json is valid JSON"
+          if [ -f openapi.json ]; then
+            node -e "JSON.parse(require('fs').readFileSync('openapi.json','utf8'))" && echo "openapi.json is valid JSON"
           fi
-          mintlify dev --port 3000 &
-        
-      - name: Wait for dev server
-        run: sleep 10
-        
-      - name: Test documentation build
-        run: |
-          curl -f http://localhost:3000 || exit 1
-          pkill -f "mintlify dev"
-        
-      - name: Deploy to Mintlify
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "Documentation validated successfully"
-          echo "Mintlify will automatically deploy from this repository"
-          echo "Configure webhook at: https://dashboard.mintlify.com"
+
+      - name: Install Mintlify CLI
+        run: npm install -g mint
+
+      - name: Validate documentation structure
+        run: mint validate
+
+      - name: Check for broken links
+        run: mint broken-links
