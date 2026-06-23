@@ -60,6 +60,16 @@
               "api-reference/authenticated/historical-date-currency",
               "api-reference/authenticated/convert-authenticated"
             ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks/overview",
+              "api-reference/webhooks/create",
+              "api-reference/webhooks/list",
+              "api-reference/webhooks/delete",
+              "api-reference/webhooks/test"
+            ]
           }
         ]
       },
