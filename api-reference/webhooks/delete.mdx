@@ -1,0 +1,13 @@
+---
+title: 'Delete Webhook (DELETE /api/webhook-subscriptions/{id})'
+openapi: 'DELETE /api/webhook-subscriptions/{id}'
+description: 'Remove a webhook subscription.'
+---
+
+## Overview
+
+Deletes one of your subscriptions. You can only delete subscriptions you own; deleting an unknown or other-account id returns `404`.
+
+<Note>
+Managed from your dashboard session, not a Bearer API key.
+</Note>

@@ -1,0 +1,13 @@
+---
+title: 'Test Webhook (POST /api/webhook-subscriptions/{id}/test)'
+openapi: 'POST /api/webhook-subscriptions/{id}/test'
+description: 'Send a sample signed delivery to verify your endpoint.'
+---
+
+## Overview
+
+Sends a one-off `rates.test` delivery to the subscription's URL, signed exactly like a real `rates.published` delivery. The response tells you the HTTP status your endpoint returned, so you can confirm your receiver and [signature verification](/api-reference/webhooks/overview#verifying-signatures) work before the next publication.
+
+<Note>
+Managed from your dashboard session, not a Bearer API key.
+</Note>
