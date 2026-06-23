@@ -567,8 +567,8 @@
       "post": {
         "operationId": "createWebhookSubscription",
         "summary": "Create Webhook Subscription",
-        "description": "Create a webhook subscription (Professional plan or higher). Returns the signing secret once. Managed via your dashboard session, not a Bearer API key.",
-        "security": [{ "cookieAuth": [] }],
+        "description": "Create a webhook subscription (Professional plan or higher). Returns the signing secret once. Authenticate with your Bearer API key (or manage from your dashboard).",
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -609,7 +609,7 @@
         "operationId": "listWebhookSubscriptions",
         "summary": "List Webhook Subscriptions",
         "description": "List your webhook subscriptions. The signing secret is never returned.",
-        "security": [{ "cookieAuth": [] }],
+        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
             "description": "Subscriptions",
@@ -637,7 +637,7 @@
         "operationId": "deleteWebhookSubscription",
         "summary": "Delete Webhook Subscription",
         "description": "Delete one of your webhook subscriptions.",
-        "security": [{ "cookieAuth": [] }],
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
@@ -659,7 +659,7 @@
         "operationId": "testWebhookSubscription",
         "summary": "Send Test Webhook",
         "description": "Send a sample rates.test delivery to the subscription's URL so you can verify your endpoint and signature handling.",
-        "security": [{ "cookieAuth": [] }],
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
@@ -681,12 +681,6 @@
         "scheme": "bearer",
         "bearerFormat": "API Key",
         "description": "API key authentication using Bearer token"
-      },
-      "cookieAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "__Secure-better-auth.session_token",
-        "description": "Session cookie set when signed in to the dashboard. Webhook subscriptions are managed from your dashboard, not with a Bearer API key."
       }
     },
     "schemas": {
