@@ -1,0 +1,101 @@
+---
+title: 'Webhooks Overview'
+description: 'Get notified the moment each business day''s RBA exchange rates are published — no polling required.'
+---
+
+## What webhooks do
+
+Instead of polling `/latest` after 4 PM hoping today's rates have landed, a webhook **pushes** them to you. When the RBA publishes the daily rates, we send a signed HTTP `POST` to the URL you register — typically within ten minutes of publication.
+
+<Note>
+Webhooks are available on the **Professional plan and above**. You can register up to 3 (Professional), 10 (Business), or 50 (Enterprise) subscriptions.
+</Note>
+
+Webhooks are managed from your **dashboard** (they use your signed-in session, not a Bearer API key). Your existing `/latest` and other REST endpoints are unchanged — webhooks are an addition, not a replacement.
+
+## Timing
+
+The RBA targets ~4:00 PM Australian Eastern Time on business days, but the exact publication time drifts (often 4–5 PM, occasionally later), and it does not publish on weekends or NSW public holidays. The webhook fires once per business day, shortly after we detect the new rates.
+
+## The delivery request
+
+We `POST` JSON to your URL with these headers:
+
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `application/json` |
+| `X-ExchangeRates-Event` | `rates.published` (or `rates.test` for test sends) |
+| `X-ExchangeRates-Signature` | `sha256=<hmac>` — see [Verifying signatures](#verifying-signatures) |
+| `X-ExchangeRates-Delivery` | A unique delivery UUID |
+| `User-Agent` | `ExchangeRatesAPI-Webhook/1.0` |
+
+Body:
+
+```json
+{
+  "event": "rates.published",
+  "date": "2026-06-23",
+  "base": "AUD",
+  "rates": { "USD": 0.7004, "JPY": 113.25 },
+  "delivery_id": "0b9d8f60-a5c3-e1d9-b2f4-a6c83f9c4e2a",
+  "timestamp": 1782086400
+}
+```
+
+`rates` contains every supported currency, or only the currencies you subscribed to. Respond with any `2xx` status to acknowledge receipt.
+
+## Verifying signatures
+
+Every delivery is signed so you can confirm it came from us. We compute `HMAC-SHA256` over the **raw request body** using your subscription's signing secret (shown once when you create the subscription), hex-encode it, and send it as `X-ExchangeRates-Signature: sha256=<hmac>`.
+
+Recompute the HMAC over the exact bytes you received and compare. Use a constant-time comparison.
+
+<CodeGroup>
+
+```javascript Node.js
+import crypto from 'node:crypto'
+
+// rawBody: the exact string/Buffer received (do NOT re-serialize parsed JSON)
+function verify(rawBody, signatureHeader, signingSecret) {
+  const expected = 'sha256=' + crypto
+    .createHmac('sha256', signingSecret)
+    .update(rawBody)
+    .digest('hex')
+  const a = Buffer.from(signatureHeader)
+  const b = Buffer.from(expected)
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+```
+
+```python Python
+import hashlib
+import hmac
+
+def verify(raw_body: bytes, signature_header: str, signing_secret: str) -> bool:
+    expected = "sha256=" + hmac.new(
+        signing_secret.encode(), raw_body, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature_header)
+```
+
+```php PHP
+<?php
+function verify(string $rawBody, string $signatureHeader, string $signingSecret): bool {
+    $expected = 'sha256=' . hash_hmac('sha256', $rawBody, $signingSecret);
+    return hash_equals($expected, $signatureHeader);
+}
+```
+
+</CodeGroup>
+
+<Warning>
+Verify against the **raw** request body bytes, not a re-serialized JSON object — re-serialization can change byte order or whitespace and break the signature.
+</Warning>
+
+## Retries and failures
+
+If your endpoint does not return a `2xx`, we retry the delivery several times with backoff. Deliveries that never succeed are dropped after the retry budget is exhausted. If a subscription fails on **7 consecutive** publications, we automatically deactivate it; it will then show as inactive when you [list your subscriptions](/api-reference/webhooks/list). Re-create it once your endpoint is healthy.
+
+## Testing your endpoint
+
+Use the [test endpoint](/api-reference/webhooks/test) to send a sample `rates.test` delivery on demand — it is signed exactly like a real one — so you can validate your receiver and signature check without waiting for the next publication.
