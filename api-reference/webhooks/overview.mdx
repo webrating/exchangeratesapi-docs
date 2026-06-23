@@ -1,17 +1,17 @@
 ---
 title: 'Webhooks Overview'
-description: 'Get notified the moment each business day''s RBA exchange rates are published — no polling required.'
+description: 'Get notified the moment each business day''s RBA exchange rates are published - no polling required.'
 ---
 
 ## What webhooks do
 
-Instead of polling `/latest` after 4 PM hoping today's rates have landed, a webhook **pushes** them to you. When the RBA publishes the daily rates, we send a signed HTTP `POST` to the URL you register — typically within ten minutes of publication.
+Instead of polling `/latest` after 4 PM hoping today's rates have landed, a webhook **pushes** them to you. When the RBA publishes the daily rates, we send a signed HTTP `POST` to the URL you register - typically within ten minutes of publication.
 
 <Note>
 Webhooks are available on the **Professional plan and above**. You can register up to 3 (Professional), 10 (Business), or 50 (Enterprise) subscriptions.
 </Note>
 
-Manage webhooks with your API key (`Authorization: Bearer YOUR_API_KEY`) — the same key you use for the rest of the API — or from your dashboard. Your existing `/latest` and other REST endpoints are unchanged; webhooks are an addition, not a replacement.
+Manage webhooks with your API key (`Authorization: Bearer YOUR_API_KEY`) - the same key you use for the rest of the API - or from your dashboard. Your existing `/latest` and other REST endpoints are unchanged; webhooks are an addition, not a replacement.
 
 ## Timing
 
@@ -25,7 +25,7 @@ We `POST` JSON to your URL with these headers:
 |--------|-------|
 | `Content-Type` | `application/json` |
 | `X-ExchangeRates-Event` | `rates.published` (or `rates.test` for test sends) |
-| `X-ExchangeRates-Signature` | `sha256=<hmac>` — see [Verifying signatures](#verifying-signatures) |
+| `X-ExchangeRates-Signature` | `sha256=<hmac>` - see [Verifying signatures](#verifying-signatures) |
 | `X-ExchangeRates-Delivery` | A unique delivery UUID |
 | `User-Agent` | `ExchangeRatesAPI-Webhook/1.0` |
 
@@ -89,7 +89,7 @@ function verify(string $rawBody, string $signatureHeader, string $signingSecret)
 </CodeGroup>
 
 <Warning>
-Verify against the **raw** request body bytes, not a re-serialized JSON object — re-serialization can change byte order or whitespace and break the signature.
+Verify against the **raw** request body bytes, not a re-serialized JSON object - re-serialization can change byte order or whitespace and break the signature.
 </Warning>
 
 ## Retries and failures
@@ -98,4 +98,4 @@ If your endpoint does not return a `2xx`, we retry the delivery several times wi
 
 ## Testing your endpoint
 
-Use the [test endpoint](/api-reference/webhooks/test) to send a sample `rates.test` delivery on demand — it is signed exactly like a real one — so you can validate your receiver and signature check without waiting for the next publication.
+Use the [test endpoint](/api-reference/webhooks/test) to send a sample `rates.test` delivery on demand - it is signed exactly like a real one - so you can validate your receiver and signature check without waiting for the next publication.

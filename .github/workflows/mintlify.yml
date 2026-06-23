@@ -1,7 +1,7 @@
 name: Validate Mintlify Documentation
 
 # The live site is deployed automatically by the Mintlify GitHub App on push to
-# master — this workflow does NOT deploy. It validates the docs (config JSON,
+# master - this workflow does NOT deploy. It validates the docs (config JSON,
 # structure, and links) so broken changes are caught around publish.
 
 on:

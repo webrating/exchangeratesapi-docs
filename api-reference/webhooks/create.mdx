@@ -6,10 +6,10 @@ description: 'Register a URL to receive signed rate-published notifications (Pro
 
 ## Overview
 
-Registers a webhook subscription. The response includes a **signing secret shown only once** — store it securely; you'll need it to [verify deliveries](/api-reference/webhooks/overview#verifying-signatures).
+Registers a webhook subscription. The response includes a **signing secret shown only once** - store it securely; you'll need it to [verify deliveries](/api-reference/webhooks/overview#verifying-signatures).
 
 <Note>
-Authenticate with your API key — the same `Authorization: Bearer YOUR_API_KEY` you use for the rest of the API. You can also create and manage webhooks from your dashboard. Professional plan or higher is required.
+Authenticate with your API key - the same `Authorization: Bearer YOUR_API_KEY` you use for the rest of the API. You can also create and manage webhooks from your dashboard. Professional plan or higher is required.
 </Note>
 
-`currencies` is optional — omit it to receive every supported currency, or pass a list (e.g. `["USD","JPY"]`) to receive only those. The `url` must be a public **HTTPS** endpoint.
+`currencies` is optional - omit it to receive every supported currency, or pass a list (e.g. `["USD","JPY"]`) to receive only those. The `url` must be a public **HTTPS** endpoint.

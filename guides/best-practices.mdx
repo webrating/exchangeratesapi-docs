@@ -103,8 +103,8 @@ class APIKeyManager {
 
 RBA publishes daily, but the exact time drifts (often 4–5 PM AET, occasionally later). There are two ways to stay current:
 
-- **Webhooks (preferred for freshness)** — on the Professional plan and above, register a [webhook](/api-reference/webhooks/overview) and we push you a signed notification within minutes of publication. You fetch exactly once, when the data is actually ready, instead of polling and guessing.
-- **Polling with smart caching** — if you poll, cache aggressively until the next expected update (below) to avoid wasted requests.
+- **Webhooks (preferred for freshness)** - on the Professional plan and above, register a [webhook](/api-reference/webhooks/overview) and we push you a signed notification within minutes of publication. You fetch exactly once, when the data is actually ready, instead of polling and guessing.
+- **Polling with smart caching** - if you poll, cache aggressively until the next expected update (below) to avoid wasted requests.
 
 Webhooks and caching are complementary: use a webhook to learn *when* new rates land, and caching to serve the data efficiently between updates.
 
