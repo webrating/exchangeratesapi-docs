@@ -170,10 +170,19 @@ echo "1 AUD = " . $data['rates']['USD'] . " USD";
 
 ## Ready to Get Started?
 
-<Card
-  title="Get Your API Key"
-  icon="key"
-  href="/quickstart"
->
-  Sign up for free and start making API calls in under 2 minutes
-</Card>
+<CardGroup cols={2}>
+  <Card
+    title="Get Your API Key"
+    icon="key"
+    href="/quickstart"
+  >
+    Sign up for free and start making API calls in under 2 minutes
+  </Card>
+  <Card
+    title="Webhooks (Professional+)"
+    icon="bell"
+    href="/api-reference/webhooks/overview"
+  >
+    Get pushed a signed notification the moment each day's rates publish — no polling
+  </Card>
+</CardGroup>

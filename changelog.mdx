@@ -3,6 +3,19 @@ title: 'Changelog'
 description: 'Track all changes, updates, and new features added to the Exchange Rates API'
 ---
 
+## June 23, 2026
+
+### Webhooks (Professional plan and above)
+
+- Added **rate-published webhooks**: get a signed `POST` to your endpoint within minutes of the RBA publishing the daily rates — no polling required. See the [Webhooks guide](/api-reference/webhooks/overview).
+- New management endpoints (dashboard session, not a Bearer API key): `POST /api/webhook-subscriptions` (create), `GET /api/webhook-subscriptions` (list), `DELETE /api/webhook-subscriptions/{id}` (delete), `POST /api/webhook-subscriptions/{id}/test` (send a test delivery).
+- Deliveries are signed with HMAC-SHA256 (`X-ExchangeRates-Signature: sha256=…`); failed deliveries are retried, and a subscription auto-deactivates after repeated failures.
+- Subscription limits: Professional 3, Business 10, Enterprise 50.
+
+### Fixes
+
+- Corrected the daily rate-refresh timing so the API tracks the RBA's same-day publication (previously could lag by a business day).
+
 ## Version 1.0.0 - September 2, 2025
 
 ### Initial Production Release

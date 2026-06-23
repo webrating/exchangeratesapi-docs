@@ -99,10 +99,19 @@ class APIKeyManager {
 }
 ```
 
+## Knowing When Rates Update
+
+RBA publishes daily, but the exact time drifts (often 4–5 PM AET, occasionally later). There are two ways to stay current:
+
+- **Webhooks (preferred for freshness)** — on the Professional plan and above, register a [webhook](/api-reference/webhooks/overview) and we push you a signed notification within minutes of publication. You fetch exactly once, when the data is actually ready, instead of polling and guessing.
+- **Polling with smart caching** — if you poll, cache aggressively until the next expected update (below) to avoid wasted requests.
+
+Webhooks and caching are complementary: use a webhook to learn *when* new rates land, and caching to serve the data efficiently between updates.
+
 ## Caching Strategies
 
 ### Smart Caching Based on RBA Schedule
-RBA updates rates daily at 4 PM AEST. Cache aggressively until the next update:
+RBA publishes rates daily around 4 PM AET (the exact time varies). Cache aggressively until the next expected update:
 
 ```javascript
 class SmartCache {
@@ -527,7 +536,7 @@ class QuotaManager {
     if (this.quotaInfo.remaining !== null && this.quotaInfo.remaining <= 0) {
       const resetTime = new Date(this.quotaInfo.reset);
       if (new Date() < resetTime) {
-        throw new Error(`Daily quota exceeded. Resets at ${resetTime.toLocaleString()}`);
+        throw new Error(`Monthly quota exceeded. Resets at ${resetTime.toLocaleString()}`);
       }
     }
     
@@ -552,8 +561,9 @@ class QuotaManager {
   }
   
   updateQuotaInfo(headers) {
-    const limit = headers.get('X-RateLimit-Limit-Daily');
-    const remaining = headers.get('X-RateLimit-Remaining-Daily');
+    // Quotas are monthly. The API returns X-RateLimit-*-Monthly plus a reset timestamp.
+    const limit = headers.get('X-RateLimit-Limit-Monthly');
+    const remaining = headers.get('X-RateLimit-Remaining-Monthly');
     const reset = headers.get('X-RateLimit-Reset');
     
     if (limit) this.quotaInfo.limit = parseInt(limit);
