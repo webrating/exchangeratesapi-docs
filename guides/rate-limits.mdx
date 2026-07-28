@@ -43,14 +43,6 @@ The free tier is perfect for:
 - Community support only
 - No SLA guarantees
 
-## API Keys per Plan
-
-Free and Starter are **single-key plans**: your account holds one active API key at a time, and generating a new key replaces the existing one. Professional and above support multiple concurrent keys, which lets you issue a separate key per team, application, or environment and revoke any one of them independently.
-
-<Note>
-On a single-key plan, generating a new key immediately invalidates the old one. Plan for a brief cutover, or upgrade to Professional if you need overlapping keys for zero-downtime rotation. See [Key Rotation](/authentication#key-rotation).
-</Note>
-
 ### Paid Plans Benefits
 
 All paid plans include:
@@ -61,6 +53,28 @@ All paid plans include:
 - Advanced features (webhooks, CSV exports)*
 
 *Some features coming soon
+
+## API Keys per Plan
+
+Free and Starter are **single-key plans**: your account holds one active API key at a time, and generating a new key replaces the existing one. Professional and above support multiple concurrent keys, which lets you issue a separate key per team, application, or environment and revoke any one of them independently.
+
+<Note>
+On a single-key plan, generating a new key immediately invalidates the old one. Plan for a brief cutover, or upgrade to Professional if you need overlapping keys for zero-downtime rotation. See [Key Rotation](/authentication#key-rotation).
+</Note>
+
+## Webhook Limits
+
+Webhooks are available on Professional and above. Each plan allows a maximum number of active webhook subscriptions:
+
+| Plan | Webhook Subscriptions |
+|------|-----------------------|
+| **Free** | Not available |
+| **Starter** | Not available |
+| **Professional** | 3 |
+| **Business** | 10 |
+| **Enterprise** | 50 |
+
+See the [Webhooks overview](/api-reference/webhooks/overview) for setup and payload details.
 
 ## Rate Limit Headers
 

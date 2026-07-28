@@ -42,3 +42,5 @@ build/
 
 # Mintlify
 .mintlify/
+# Playwright MCP
+.playwright-mcp/
