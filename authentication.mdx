@@ -186,7 +186,13 @@ If your API key is compromised:
 5. Update your applications with the new key
 
 ### Key Rotation
-For security, we recommend rotating your API keys periodically:
+For security, we recommend rotating your API keys periodically.
+
+<Warning>
+The overlapping rotation below requires a plan that supports more than one active key (Professional and above). On the **Free** and **Starter** plans your account holds a single key, and generating a new one immediately invalidates the old one - see [Single-Key Plan Rotation](#single-key-plan-rotation) below.
+</Warning>
+
+#### Multi-Key Rotation (Professional and above)
 
 <Steps>
   <Step title="Generate New Key">
@@ -205,6 +211,28 @@ For security, we recommend rotating your API keys periodically:
     Once confirmed, revoke the old API key to complete the rotation
   </Step>
 </Steps>
+
+#### Single-Key Plan Rotation
+
+On Free and Starter there is no overlap window: the moment you generate a replacement, every application still using the previous key will receive `401` responses. Rotate during a planned maintenance window:
+
+<Steps>
+  <Step title="Prepare Deployment">
+    Stage your applications so the new key can be rolled out immediately - for example, by reading the key from an environment variable or secret store you can update in one step
+  </Step>
+
+  <Step title="Generate Replacement Key">
+    Generate the new key in your dashboard. The previous key stops working at this point
+  </Step>
+
+  <Step title="Deploy Immediately">
+    Roll the new key out to all applications and confirm requests are succeeding
+  </Step>
+</Steps>
+
+<Note>
+If you cannot tolerate a cutover gap, or you need separate keys per team or environment, upgrade to Professional (5 keys) or Business (10 keys). See [Rate Limits](/guides/rate-limits#api-keys-per-plan) for per-plan key allowances.
+</Note>
 
 ## Authentication Errors
 

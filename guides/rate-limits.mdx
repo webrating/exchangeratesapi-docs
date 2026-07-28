@@ -15,12 +15,13 @@ All rate limits are calculated based on your **billing cycle** and reset on your
 
 <Card title="Plan Tiers">
 
-| Plan | Price (AUD/month) | Monthly Requests | Historical Data | Timeseries Max Range | Support |
-|------|-------------------|------------------|-----------------|----------------------|---------|
-| **Free** | $0 | 300 (one-time) | None | No access | Community |
-| **Starter** | $29 | 5,000 | Last 30 days | 7 days | Email (48h) |
-| **Professional** | $79 | 50,000 | Full (2018+) | 90 days | Email (24h) |
-| **Business** | $299 | 500,000 | Full (2018+) | 365 days | Phone (4h) |
+| Plan | Price (AUD/month) | Monthly Requests | API Keys | Historical Data | Timeseries Max Range | Support |
+|------|-------------------|------------------|----------|-----------------|----------------------|---------|
+| **Free** | $0 | 300 (one-time) | 1 | None | No access | Community |
+| **Starter** | $29 | 5,000 | 1 | Last 30 days | 7 days | Email (48h) |
+| **Professional** | $79 | 50,000 | 5 | Full (2018+) | 90 days | Email (24h) |
+| **Business** | $299 | 500,000 | 10 | Full (2018+) | 365 days | Phone (4h) |
+| **Enterprise** | Custom | 5,000,000 | 20 | Full (2018+) | 365 days | Dedicated (1h) |
 
 </Card>
 
@@ -38,8 +39,17 @@ The free tier is perfect for:
 - 300 requests total (one-time trial allowance, does not reset monthly)
 - No historical data access
 - No timeseries endpoint access  
+- Single API key only
 - Community support only
 - No SLA guarantees
+
+## API Keys per Plan
+
+Free and Starter are **single-key plans**: your account holds one active API key at a time, and generating a new key replaces the existing one. Professional and above support multiple concurrent keys, which lets you issue a separate key per team, application, or environment and revoke any one of them independently.
+
+<Note>
+On a single-key plan, generating a new key immediately invalidates the old one. Plan for a brief cutover, or upgrade to Professional if you need overlapping keys for zero-downtime rotation. See [Key Rotation](/authentication#key-rotation).
+</Note>
 
 ### Paid Plans Benefits
 
