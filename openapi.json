@@ -119,7 +119,7 @@
       "get": {
         "operationId": "convertCurrency",
         "summary": "Currency Conversion",
-        "description": "Convert amounts between currencies. Requires authentication. Free tier: 300, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
+        "description": "Convert amounts between currencies. Requires authentication. Free tier: 150, no historical data. Starter: 5,000/month, 30 days history. Professional: 50,000/month, full history. Business: 500,000/month, full history.",
         "security": [
           {
             "bearerAuth": []
@@ -175,7 +175,7 @@
             "description": "Conversion result",
             "headers": {
               "X-RateLimit-Limit-Monthly": {
-                "description": "Monthly request limit based on plan (Free=300, Starter=5,000, Professional=50,000, Business=500,000)",
+                "description": "Monthly request limit based on plan (Free=150, Starter=5,000, Professional=50,000, Business=500,000)",
                 "schema": {
                   "type": "integer"
                 }
@@ -225,7 +225,7 @@
       "get": {
         "operationId": "getLatestRates",
         "summary": "Latest Exchange Rates",
-        "description": "Get all current exchange rates from the Reserve Bank of Australia with optional filtering. Quota limits: Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
+        "description": "Get all current exchange rates from the Reserve Bank of Australia with optional filtering. Quota limits: Free=150 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
         "security": [
           {
             "bearerAuth": []
@@ -291,7 +291,7 @@
       "get": {
         "operationId": "getLatestRateForCurrency",
         "summary": "Latest Rate for Currency",
-        "description": "Get the current exchange rate for a specific currency. Quota limits: Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
+        "description": "Get the current exchange rate for a specific currency. Quota limits: Free=150 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month.",
         "security": [
           {
             "bearerAuth": []
@@ -1177,7 +1177,7 @@
               "error": {
                 "code": 429,
                 "type": "rate_limit",
-                "info": "Quota exceeded. Free=300 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month."
+                "info": "Quota exceeded. Free=150 (one-time trial), Starter=5,000/month, Professional=50,000/month, Business=500,000/month."
               }
             }
           }
